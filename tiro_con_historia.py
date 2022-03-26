@@ -12,7 +12,7 @@ class Player(pyglet.sprite.Sprite):
         self.vy = -5
         self.vx = 2
         self.dt_accum = 0
-        self.imagen = "imagenes/ball.png"
+        self.imagen = "imagenes/objeto_2.png"
         image = pyglet.resource.image(self.imagen)
         super().__init__(img=image, *args, **kwargs)
 
@@ -22,7 +22,9 @@ class Player(pyglet.sprite.Sprite):
 
         self.x = -50
         self.y = 200
+        self.vr = 20
         self.history = []
+        self.scale = 0.5
 
     def serializar(self):
         return {
@@ -32,6 +34,7 @@ class Player(pyglet.sprite.Sprite):
                 "vx": self.vx,
                 "imagen": self.imagen,
                 "rotation": self.rotation,
+                "vr": self.vr,
         }
 
     def restaurar(self, serializado):
@@ -41,6 +44,7 @@ class Player(pyglet.sprite.Sprite):
         self.vx = serializado["vx"]
         self.imagen = serializado["imagen"]
         self.rotation = serializado["rotation"]
+        self.vr = serializado["vr"]
 
     def update(self, dt):
         global last_delta_time
@@ -90,7 +94,7 @@ class Player(pyglet.sprite.Sprite):
             if self.x > 800:
                 self.x = -50
 
-            self.rotation += 10 * dt
+            self.rotation += self.vr * dt
 
             self.history.append(self.serializar())
 
