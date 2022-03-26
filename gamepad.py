@@ -12,7 +12,8 @@ if joysticks:
     print("Hay un joystick")
     joystick = joysticks[0]
 
-joystick.open()
+if joystick:
+    joystick.open()
 
 class Player(pyglet.sprite.Sprite):
 
@@ -32,12 +33,16 @@ class Player(pyglet.sprite.Sprite):
 
     def update(self, dt):
 
-        if joystick.x > 0.5 or keys[key.RIGHT]:
+        if joystick:
+            if joystick.x > 0.5:
+                self.x += 10
+            elif joystick.x < -0.5:
+                self.x -= 10
+
+        if keys[key.RIGHT]:
             self.x += 10
-        elif joystick.x < -0.5 or keys[key.LEFT]:
+        elif keys[key.LEFT]:
             self.x -= 10
-        else:
-            pass
 
         if self.x <= 80:
             self.x = 80
