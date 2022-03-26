@@ -6,19 +6,27 @@ delta_time = 1
 class Player(pyglet.sprite.Sprite):
 
     def __init__(self, *args, **kwargs):
-        image = pyglet.resource.image("imagenes/player.png")
+        image = pyglet.resource.image("imagenes/rain.png")
         super().__init__(img=image, *args, **kwargs)
 
         image.anchor_x = image.width / 2
         image.anchor_y = image.height / 2
+        self.scale = 2
 
         self.x = 100
         self.y = 100
 
+        # TODO: intentar hacer que el movimiento se conecte
+        #       o sea "tileable"
+
     def update(self, dt):
-        self.x += 20 * dt * delta_time
-        self.y += 20 * dt * delta_time
-        self.rotation += 30 * dt * delta_time
+        self.y -= 200 * dt * delta_time
+
+        if self.y < 0:
+            self.y = 600
+
+        if self.y > 600:
+            self.y = 0
 
 
 class Label(pyglet.text.Label):
