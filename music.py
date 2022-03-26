@@ -24,9 +24,7 @@ def on_draw():
     window.clear()
 
 
-@window.event
-def on_mouse_motion(x, y, dx, dy):
-    delta_time = (x - 400) / 400.0
+def calculate_direction(delta_time):
     #player.pitch = delta_time + 1
     player.pitch = abs(delta_time) * 1.4
     #player_reverse.pitch = delta_time*-1 + 1
@@ -42,6 +40,13 @@ def on_mouse_motion(x, y, dx, dy):
             player.pause()
             player_reverse.play()
             reversed = True
+
+
+@window.event
+def on_mouse_motion(x, y, dx, dy):
+    delta_time = (x - 400) / 400.0
+    calculate_direction(delta_time)
+
 
 
 pyglet.app.run()
