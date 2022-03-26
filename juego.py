@@ -28,7 +28,7 @@ x = 0
 
 def update(dt):
     global x
-    x += 10 * dt
+
 
 pyglet.clock.schedule_interval(update, 1/120.0)
 

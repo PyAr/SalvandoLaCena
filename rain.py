@@ -3,30 +3,21 @@ import pyglet
 window = pyglet.window.Window(800, 600)
 delta_time = 1
 
-class Player(pyglet.sprite.Sprite):
+class Lluvia(pyglet.sprite.Sprite):
 
-    def __init__(self, *args, **kwargs):
-        image = pyglet.resource.image("imagenes/rain.png")
+    def __init__(self, nombre_imagen="imagenes/lluvia-02.png", velocidad=200, *args, **kwargs):
+        self.velocidad = velocidad
+        image = pyglet.resource.image(nombre_imagen)
+        self.textura = pyglet.image.TileableTexture.create_for_image(image)
         super().__init__(img=image, *args, **kwargs)
 
-        image.anchor_x = image.width / 2
-        image.anchor_y = image.height / 2
-        self.scale = 2
-
-        self.x = 100
-        self.y = 100
-
-        # TODO: intentar hacer que el movimiento se conecte
-        #       o sea "tileable"
+    def draw(self):
+        pyglet.gl.glEnable(pyglet.gl.GL_BLEND)
+        pyglet.gl.glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
+        self.textura.blit_tiled(0, 0, 0, 800, 600)
 
     def update(self, dt):
-        self.y -= 200 * dt * delta_time
-
-        if self.y < 0:
-            self.y = 600
-
-        if self.y > 600:
-            self.y = 0
+        self.textura.anchor_y += dt * delta_time * self.velocidad
 
 
 class Label(pyglet.text.Label):
@@ -40,17 +31,22 @@ class Label(pyglet.text.Label):
         pass
 
 
-player = Player()
+capas = [
+    Lluvia("imagenes/lluvia-02.png", velocidad=800),
+    Lluvia("imagenes/lluvia-01.png", velocidad=1200),
+]
 label = Label()
 
 def update(dt):
-    player.update(dt)
+    for capa in capas:
+        capa.update(dt)
     label.update(dt)
 
 @window.event
 def on_draw():
     window.clear()
-    player.draw()
+    for capa in capas:
+        capa.draw()
     label.draw()
 
 @window.event
