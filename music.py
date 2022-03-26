@@ -11,8 +11,9 @@ player = pyglet.media.Player()
 player_reverse = pyglet.media.Player()
 
 player.queue(song)
+player.loop = True
 player_reverse.queue(reversed_song)
-
+player_reverse.loop = True
 player.play()
 
 reversed = False
