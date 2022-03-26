@@ -27,16 +27,18 @@ def on_draw():
 @window.event
 def on_mouse_motion(x, y, dx, dy):
     delta_time = (x - 400) / 400.0
-    player.pitch = delta_time + 1
-    player_reverse.pitch = delta_time*-1 + 1
+    #player.pitch = delta_time + 1
+    player.pitch = abs(delta_time) * 1.4
+    #player_reverse.pitch = delta_time*-1 + 1
+    player_reverse.pitch = abs(delta_time) * 1.4
     global reversed
     if reversed:
-        if x >= 400:
+        if delta_time >= 0:
             player_reverse.pause()
             player.play()
             reversed = False
     else:
-        if x < 400:
+        if delta_time < 0:
             player.pause()
             player_reverse.play()
             reversed = True
