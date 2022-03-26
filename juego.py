@@ -25,6 +25,7 @@ jugador_1 = pyglet.resource.image("imagenes/jugador1.png")
 jugador_2 = pyglet.resource.image("imagenes/jugador2.png")
 
 x = 0
+y = window.width-600
 
 def update(dt):
     global x
@@ -34,11 +35,13 @@ pyglet.clock.schedule_interval(update, 1/120.0)
 
 @window.event
 def on_draw():
+    pyglet.gl.glEnable(pyglet.gl.GL_BLEND)
+    pyglet.gl.glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
     global x
     window.clear()
     fondo.blit(0, 0)
-    jugador_2.blit(x, 75)
-    jugador_1.blit(400, 75)
+    jugador_2.blit(x, y+14)
+    jugador_1.blit(400, y)
     titulo.draw()
     empezar.draw()
 
