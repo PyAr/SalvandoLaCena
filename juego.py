@@ -37,8 +37,8 @@ def on_draw():
     global x
     window.clear()
     fondo.blit(0, 0)
-    jugador_1.blit(x, 75)
-    jugador_2.blit(400, 75)
+    jugador_2.blit(x, 75)
+    jugador_1.blit(400, 75)
     titulo.draw()
     empezar.draw()
 
