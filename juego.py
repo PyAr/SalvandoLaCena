@@ -20,6 +20,7 @@ empezar = pyglet.text.Label('Cualquier tecla\npara comenzar',
                           anchor_x='center', 
                           anchor_y='center')
 
+fondo = pyglet.resource.image("imagenes/fondo.png")
 jugador_1 = pyglet.resource.image("imagenes/jugador1.png")
 jugador_2 = pyglet.resource.image("imagenes/jugador2.png")
 
@@ -27,7 +28,7 @@ x = 0
 
 def update(dt):
     global x
-    x += 10 * dt
+
 
 pyglet.clock.schedule_interval(update, 1/120.0)
 
@@ -35,9 +36,10 @@ pyglet.clock.schedule_interval(update, 1/120.0)
 def on_draw():
     global x
     window.clear()
-    titulo.draw()
-    empezar.draw()
+    fondo.blit(0, 0)
     jugador_1.blit(x, 75)
     jugador_2.blit(400, 75)
+    titulo.draw()
+    empezar.draw()
 
 pyglet.app.run()

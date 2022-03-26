@@ -52,7 +52,7 @@ def on_draw():
 @window.event
 def on_mouse_motion(x, y, dx, dy):
     global delta_time
-    delta_time = (x - 400 ) / 400.0
+    delta_time = (x - 400 ) / 200.0
 
 
 pyglet.clock.schedule_interval(update, 1/60.0)
