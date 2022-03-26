@@ -1,3 +1,7 @@
+import math
+import socket
+import time
+
 import pyglet
 
 wavefile_name = 'music/music.wav'
@@ -24,7 +28,7 @@ def on_draw():
     window.clear()
 
 
-def calculate_direction(delta_time):
+def update_direction(delta_time):
     #player.pitch = delta_time + 1
     player.pitch = abs(delta_time) * 1.4
     #player_reverse.pitch = delta_time*-1 + 1
@@ -45,8 +49,39 @@ def calculate_direction(delta_time):
 @window.event
 def on_mouse_motion(x, y, dx, dy):
     delta_time = (x - 400) / 400.0
-    calculate_direction(delta_time)
+    update_direction(delta_time)
+
+def convert_speed_value(value):
+    converted_value = -1*math.log10(-value+947) + 2
+    print(converted_value)
+    return converted_value
+
+#s = socket.socket()
+#s.connect(('192.168.4.1', 80))
 
 
+def read_wheel():
+    s.send(b"\xFF")
+    raw = s.recv(10)
+    raw_value = (int(raw.decode("ascii")))
+    delta_time = convert_speed_value(raw_value)
+    return delta_time
 
+
+def read_wheel_fake():
+    for row in open("wheelvalues.txt", "r"):
+        converted_value = convert_speed_value(int(row))
+        print(converted_value)
+        yield converted_value
+
+FAKE_WHEEL = read_wheel_fake()
+
+def update(dt):
+    print(dt)
+    #delta_time = read_wheel()
+    delta_time = next(FAKE_WHEEL)
+    update_direction(delta_time)
+
+
+pyglet.clock.schedule_interval(update, 1/20.0)
 pyglet.app.run()
