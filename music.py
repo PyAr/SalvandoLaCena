@@ -3,7 +3,7 @@ import pyglet
 wavefile_name = 'music/music.wav'
 wavefile_name_reverse = 'music/music_reversed.wav'
 
-window = pyglet.window.Window()
+window = pyglet.window.Window(800, 600)
 
 song = pyglet.media.load(wavefile_name)
 reversed_song = pyglet.media.load(wavefile_name_reverse)
@@ -26,10 +26,12 @@ def on_draw():
 
 @window.event
 def on_mouse_motion(x, y, dx, dy):
-    player.pitch = x/200.0
+    delta_time = (x - 400) / 400.0
+    player.pitch = delta_time + 1
+    player_reverse.pitch = delta_time*-1 + 1
     global reversed
     if reversed:
-        if x > 400:
+        if x >= 400:
             player_reverse.pause()
             player.play()
             reversed = False
