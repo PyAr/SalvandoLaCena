@@ -12,6 +12,7 @@ player_reverse = pyglet.media.Player()
 
 player.queue(song)
 player_reverse.queue(reversed_song)
+
 player.play()
 
 reversed = False
@@ -29,12 +30,12 @@ def on_mouse_motion(x, y, dx, dy):
     if reversed:
         if x > 400:
             player_reverse.pause()
-            player.play(loop=True)
+            player.play()
             reversed = False
     else:
         if x < 400:
             player.pause()
-            player_reverse.play(loop=True)
+            player_reverse.play()
             reversed = True
 
 
