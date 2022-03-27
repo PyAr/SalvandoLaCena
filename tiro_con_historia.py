@@ -5,6 +5,7 @@ window = pyglet.window.Window(800, 600)
 last_delta_time = 1
 delta_time = 1
 freq = 0.05
+dt_accum = 0
 
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
@@ -24,7 +25,6 @@ class Pelota(pyglet.sprite.Sprite):
     def __init__(self, *args, **kwargs):
         self.vy = -5
         self.vx = 2
-        self.dt_accum = 0
         self.imagen = "imagenes/objeto_1.png"
         image = pyglet.resource.image(self.imagen)
         super().__init__(img=image, *args, **kwargs)
@@ -38,6 +38,7 @@ class Pelota(pyglet.sprite.Sprite):
         self.vr = 5
         self.history = []
         self.scale = 0.5
+        self.muerto = False
 
     def serializar(self):
         return {
@@ -48,6 +49,7 @@ class Pelota(pyglet.sprite.Sprite):
                 "imagen": self.imagen,
                 "rotation": self.rotation,
                 "vr": self.vr,
+                "muerto": self.muerto,
         }
 
     def restaurar(self, serializado):
@@ -58,14 +60,15 @@ class Pelota(pyglet.sprite.Sprite):
         self.imagen = serializado["imagen"]
         self.rotation = serializado["rotation"]
         self.vr = serializado["vr"]
+        self.muerto = serializado["muerto"]
 
     def update(self, dt, player):
-        global last_delta_time
+        global last_delta_time, dt_accum
 
         if delta_time > 0 and last_delta_time < 0:
-            self.dt_accum = 0
+            dt_accum = 0
         elif delta_time < 0 and last_delta_time > 0:
-            self.dt_accum = 0
+            dt_accum = 0
 
         if delta_time > 0:
             self.update_avanza(dt, player)
@@ -75,13 +78,13 @@ class Pelota(pyglet.sprite.Sprite):
         last_delta_time = delta_time
 
     def update_atras(self, dt):
-        global delta_time
+        global delta_time, dt_accum
 
-        self.dt_accum += dt * 30 * abs(delta_time)
+        dt_accum += dt * 30 * abs(delta_time)
         step = None
 
-        while self.dt_accum > freq:
-            self.dt_accum -= freq
+        while dt_accum > freq:
+            dt_accum -= freq
             if self.history:
                 step = self.history.pop()
 
@@ -89,12 +92,12 @@ class Pelota(pyglet.sprite.Sprite):
             self.restaurar(step)
 
     def update_avanza(self, dt, player):
-        global delta_time
-        self.dt_accum += 0.01 * delta_time * 15
+        global delta_time, dt_accum
+        dt_accum += 0.01 * delta_time * 15
         dt = dt * 20
 
-        while self.dt_accum > freq:
-            self.dt_accum -= freq
+        while dt_accum > freq:
+            dt_accum -= freq
 
             self.y -= self.vy * dt
             self.vy += 0.2 * dt
@@ -103,7 +106,7 @@ class Pelota(pyglet.sprite.Sprite):
             if self.y < 100:
 
                 # Si colisiona con la plataforma
-                if (player.x - 100 < self.x < player.x + 100):
+                if not self.muerto and player.x - 100 < self.x < player.x + 100:
                     self.y = 100
                     self.vy = -13
                 else:
@@ -112,6 +115,7 @@ class Pelota(pyglet.sprite.Sprite):
                     self.vy = 0
                     self.vr = 0
                     self.vx = 0
+                    self.muerto = True
 
             if self.x > 800:
                 self.x = -50
@@ -178,9 +182,9 @@ def update(dt):
 @window.event
 def on_draw():
     window.clear()
+    player.draw()
     pelota.draw()
     label.draw()
-    player.draw()
 
 @window.event
 def on_mouse_motion(x, y, dx, dy):
