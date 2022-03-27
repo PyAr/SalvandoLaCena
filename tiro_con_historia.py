@@ -14,6 +14,8 @@ last_delta_time = 1
 delta_time = 1
 freq = 0.05
 dt_accum = 0
+COLCHON = 140
+SUELO = 70
 
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
@@ -77,6 +79,14 @@ class Lluvia(pyglet.sprite.Sprite):
         self.textura.anchor_y += dt * delta_time * self.velocidad
 
 
+class Fondo(pyglet.sprite.Sprite):
+
+    def __init__(self, imagen, *args, **kwargs):
+        self.imagen = imagen
+        image = pyglet.resource.image(self.imagen)
+        super().__init__(img=image, *args, **kwargs)
+
+
 class Pelota(pyglet.sprite.Sprite):
 
     def __init__(self, espera, imagen, *args, **kwargs):
@@ -89,7 +99,7 @@ class Pelota(pyglet.sprite.Sprite):
 
         image.anchor_x = image.width / 2
         image.anchor_y = image.height / 2
-        self.scale = 2
+        self.scale = 2.5
 
         self.x = -50
         self.y = 200
@@ -177,19 +187,21 @@ class Pelota(pyglet.sprite.Sprite):
             self.vy += 0.2 * dt
             self.x += self.vx * dt
 
-            if self.y < 100:
+            if self.y < COLCHON:
 
                 # Si colisiona con la plataforma
-                if not self.muerto and player.x - 100 < self.x < player.x + 100:
-                    self.y = 100
+                if not self.muerto and player.x - 100 < self.x < player.x + 100 and self.y > SUELO:
+                    self.y = COLCHON
                     self.vy = -13
                 else:
-                    # Si no colisiona con la plataforma
-                    self.y = 99
-                    self.vy = 0
-                    self.vr = 0
-                    self.vx = 0
-                    self.muerto = True
+
+                    if self.y < SUELO:
+                        # Si no colisiona con la plataforma
+                        self.y = SUELO - 1
+                        self.vy = 0
+                        self.vr = 0
+                        self.vx = 0
+                        self.muerto = True
 
             if self.x > 800:
                 self.x = 900
@@ -215,10 +227,10 @@ class Player(pyglet.sprite.Sprite):
 
         image.anchor_x = image.width / 2
         image.anchor_y = image.height / 2
-        self.scale = 2
+        self.scale = 0.8
 
         self.x = 100
-        self.y = 100
+        self.y = 80
 
         # TODO: intentar hacer que el movimiento se conecte
         #       o sea "tileable"
@@ -228,7 +240,8 @@ class Player(pyglet.sprite.Sprite):
         global reversed
 
         if joystick:
-            self.x += joystick.x * 10
+            if joystick.x < -0.2 or joystick.x > 0.2:
+                self.x += joystick.x * 20
 
         if keys[key.RIGHT]:
             self.x += 10
@@ -249,7 +262,7 @@ class Player(pyglet.sprite.Sprite):
 
 player = Player()
 #          1   2    3    4    5    6    7    8    9    10
-esperas = [0, 130, 200, 220, 260, 280, 350, 390, 450, 500]
+esperas = [0, 130, 150, 180, 400, 420, 440, 490, 550, 600]
 objetos = []
 
 
@@ -261,6 +274,7 @@ for numero, espera in enumerate(esperas):
 label = Label()
 lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800)
 lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200)
+fondo = Fondo("imagenes/fondo_juego.png")
 
 # contador = 60
 
@@ -289,6 +303,7 @@ def update(dt):
 @window.event
 def on_draw():
     window.clear()
+    fondo.draw()
     lluvia_2.draw()
     player.draw()
         
