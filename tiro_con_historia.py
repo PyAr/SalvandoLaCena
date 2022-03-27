@@ -59,6 +59,22 @@ def update_direction(delta_time):
             reversed = True
 
 
+class Lluvia(pyglet.sprite.Sprite):
+
+    def __init__(self, nombre_imagen="imagenes/lluvia-02.png", velocidad=200, *args, **kwargs):
+        self.velocidad = velocidad
+        image = pyglet.resource.image(nombre_imagen)
+        self.textura = pyglet.image.TileableTexture.create_for_image(image)
+        super().__init__(img=image, *args, **kwargs)
+
+    def draw(self):
+        pyglet.gl.glEnable(pyglet.gl.GL_BLEND)
+        pyglet.gl.glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
+        self.textura.blit_tiled(0, 0, 0, 800, 600)
+
+    def update(self, dt):
+        self.textura.anchor_y += dt * delta_time * self.velocidad
+
 
 class Pelota(pyglet.sprite.Sprite):
 
@@ -212,12 +228,16 @@ class Player(pyglet.sprite.Sprite):
 player = Player()
 pelota = Pelota()
 label = Label()
+lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800)
+lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200)
 
 def update(dt):
     global delta_time
     #print(joystick.x)
     pelota.update(dt, player)
     label.update(dt)
+    lluvia_1.update(dt)
+    lluvia_2.update(dt)
     player.update(dt)
     delta_time = next(FAKE_WHEEL)
     update_direction(delta_time)
@@ -225,9 +245,11 @@ def update(dt):
 @window.event
 def on_draw():
     window.clear()
+    lluvia_2.draw()
     player.draw()
     pelota.draw()
     label.draw()
+    lluvia_1.draw()
 
 # @window.event
 # def on_mouse_motion(x, y, dx, dy):
@@ -238,7 +260,6 @@ def on_draw():
 
 def convert_speed_value(value):
     converted_value = -1*math.log10(-value+947) + 2
-    print(converted_value)
     return converted_value
 
 
@@ -257,7 +278,6 @@ def generate_wheel_fake():
     lista = []
     for row in open("wheelvalues.txt", "r"):
         converted_value = convert_speed_value(int(row))
-        print(converted_value)
         lista.append(converted_value)
     return lista
 
