@@ -80,7 +80,7 @@ class Lluvia(pyglet.sprite.Sprite):
 class Pelota(pyglet.sprite.Sprite):
 
     def __init__(self, espera, imagen, *args, **kwargs):
-        self.vy = -5
+        self.vy = -10
         self.vx = 2
         self.imagen = imagen
         image = pyglet.resource.image(self.imagen)
@@ -137,6 +137,11 @@ class Pelota(pyglet.sprite.Sprite):
 
         last_delta_time = delta_time
 
+        if self.muerto:
+            self.opacity = 80
+        else:
+            self.opacity = 255
+
     def update_atras(self, dt):
         global delta_time, dt_accum
 
@@ -162,7 +167,6 @@ class Pelota(pyglet.sprite.Sprite):
             dt_accum -= freq
 
             if self.espera > 0:
-                print(self.espera)
                 self.espera -= dt
                 if self.espera < 0:
                     self.espera = 0
@@ -224,10 +228,7 @@ class Player(pyglet.sprite.Sprite):
         global reversed
 
         if joystick:
-            if joystick.x > 0.5:
-                self.x += 10
-            elif joystick.x < -0.5:
-                self.x -= 10
+            self.x += joystick.x * 10
 
         if keys[key.RIGHT]:
             self.x += 10
@@ -247,9 +248,15 @@ class Player(pyglet.sprite.Sprite):
 
 
 player = Player()
-pelota1 = Pelota(espera=0, imagen="imagenes/objeto_1.png")
-pelota2 = Pelota(espera=200, imagen="imagenes/objeto_2.png")
-#pelota3 = Pelota(espera=600, imagen="imagenes/objeto_3.png")
+#          1   2    3    4    5    6    7    8    9    10
+esperas = [0, 130, 200, 220, 260, 280, 350, 390, 450, 500]
+objetos = []
+
+
+for numero, espera in enumerate(esperas):
+    objeto = Pelota(espera=espera, imagen=f"imagenes/objeto_{numero + 1}.png")
+    objetos.append(objeto)
+
 
 label = Label()
 lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800)
@@ -261,9 +268,8 @@ def update(dt):
     global delta_time
     # global contador
     #print(joystick.x)
-    pelota1.update(dt, player)
-    pelota2.update(dt, player)
-    #pelota3.update(dt, player)
+    for x in objetos:
+        x.update(dt, player)
 
     label.update(dt)
     lluvia_1.update(dt)
@@ -285,9 +291,10 @@ def on_draw():
     window.clear()
     lluvia_2.draw()
     player.draw()
-    pelota1.draw()
-    pelota2.draw()
-    #pelota3.draw()
+        
+    for x in objetos:
+        x.draw()
+
     label.draw()
     lluvia_1.draw()
 
