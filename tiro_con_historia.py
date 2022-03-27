@@ -1,9 +1,10 @@
 import math
-import socket
 import time
+import socket
 import pyglet
 from pyglet.window import key
 from itertools import cycle
+import threading
 
 wavefile_name = 'music/music.wav'
 wavefile_name_reverse = 'music/music_reversed.wav'
@@ -231,15 +232,26 @@ label = Label()
 lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800)
 lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200)
 
+# contador = 60
+
 def update(dt):
     global delta_time
+    # global contador
     #print(joystick.x)
     pelota.update(dt, player)
     label.update(dt)
     lluvia_1.update(dt)
     lluvia_2.update(dt)
     player.update(dt)
-    delta_time = next(FAKE_WHEEL)
+    # print(contador)
+
+    # if contador == 0:
+        # contador = 60
+        # delta_time = -read_wheel()
+    # else:
+        # contador -= 1
+
+    #delta_time = next(FAKE_WHEEL)
     update_direction(delta_time)
 
 @window.event
@@ -250,6 +262,7 @@ def on_draw():
     pelota.draw()
     label.draw()
     lluvia_1.draw()
+
 
 # @window.event
 # def on_mouse_motion(x, y, dx, dy):
@@ -263,16 +276,20 @@ def convert_speed_value(value):
     return converted_value
 
 
-#s = socket.socket()
-#s.connect(('192.168.4.1', 80))
+s = socket.socket()
+s.connect(('192.168.4.1', 80))
 
 
 def read_wheel():
-    s.send(b"\xFF")
-    raw = s.recv(10)
-    raw_value = (int(raw.decode("ascii")))
-    delta_time = convert_speed_value(raw_value)
-    return delta_time
+    global delta_time
+
+    while True:
+        time.sleep(.1)
+
+        s.send(b"\xFF")
+        raw = s.recv(10)
+        raw_value = (int(raw.decode("ascii")))
+        delta_time = -convert_speed_value(raw_value)
 
 def generate_wheel_fake():
     lista = []
@@ -283,6 +300,15 @@ def generate_wheel_fake():
 
 
 FAKE_WHEEL = cycle(generate_wheel_fake())
+
+t1 = threading.Thread(target=read_wheel)
+
+t1.start()
+
+@window.event
+def on_close():
+    t1.join()
+    print("cerrando")
 
 pyglet.clock.schedule_interval(update, 1/100.0)
 pyglet.app.run()
