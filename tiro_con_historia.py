@@ -207,6 +207,9 @@ class Player(pyglet.sprite.Sprite):
         #       o sea "tileable"
 
     def update(self, dt):
+        global joystick
+
+        print(joystick.x)
 
         if joystick:
             if joystick.x > 0.5:
@@ -276,12 +279,13 @@ def convert_speed_value(value):
     return converted_value
 
 
-s = socket.socket()
-s.connect(('192.168.4.1', 80))
 
 
 def read_wheel():
     global delta_time
+
+    s = socket.socket()
+    s.connect(('192.168.4.1', 80))
 
     while True:
         time.sleep(.1)
@@ -301,13 +305,12 @@ def generate_wheel_fake():
 
 FAKE_WHEEL = cycle(generate_wheel_fake())
 
-t1 = threading.Thread(target=read_wheel)
-
-t1.start()
+# t1 = threading.Thread(target=read_wheel)
+# t1.start()
 
 @window.event
 def on_close():
-    t1.join()
+    #t1.join()
     print("cerrando")
 
 pyglet.clock.schedule_interval(update, 1/100.0)
