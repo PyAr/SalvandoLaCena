@@ -1,5 +1,12 @@
+import math
+import socket
+import time
 import pyglet
 from pyglet.window import key
+from itertools import cycle
+
+wavefile_name = 'music/music.wav'
+wavefile_name_reverse = 'music/music_reversed.wav'
 
 window = pyglet.window.Window(800, 600)
 last_delta_time = 1
@@ -18,6 +25,39 @@ if joysticks:
 
 if joystick:
     joystick.open()
+
+
+## musica
+song = pyglet.media.load(wavefile_name)
+reversed_song = pyglet.media.load(wavefile_name_reverse)
+music_player = pyglet.media.Player()
+player_reverse = pyglet.media.Player()
+
+music_player.queue(song)
+music_player.loop = True
+player_reverse.queue(reversed_song)
+player_reverse.loop = True
+music_player.play()
+
+reversed = False
+
+def update_direction(delta_time):
+    #player.pitch = delta_time + 1
+    music_player.pitch = abs(delta_time) * 1.4
+    #player_reverse.pitch = delta_time*-1 + 1
+    player_reverse.pitch = abs(delta_time) * 1.4
+    global reversed
+    if reversed:
+        if delta_time >= 0:
+            player_reverse.pause()
+            music_player.play()
+            reversed = False
+    else:
+        if delta_time < 0:
+            music_player.pause()
+            player_reverse.play()
+            reversed = True
+
 
 
 class Pelota(pyglet.sprite.Sprite):
@@ -174,10 +214,13 @@ pelota = Pelota()
 label = Label()
 
 def update(dt):
+    global delta_time
     #print(joystick.x)
     pelota.update(dt, player)
     label.update(dt)
     player.update(dt)
+    delta_time = next(FAKE_WHEEL)
+    update_direction(delta_time)
 
 @window.event
 def on_draw():
@@ -186,13 +229,40 @@ def on_draw():
     pelota.draw()
     label.draw()
 
-@window.event
-def on_mouse_motion(x, y, dx, dy):
-    global delta_time
+# @window.event
+# def on_mouse_motion(x, y, dx, dy):
+    # global delta_time
 
-    # OJO, pusimos * 2 porque los límites
-    delta_time = 2 * ((x - 400 ) / 400.0)
+    # # OJO, pusimos * 2 porque los límites
+    # delta_time = 2 * ((x - 400 ) / 400.0)
 
+def convert_speed_value(value):
+    converted_value = -1*math.log10(-value+947) + 2
+    print(converted_value)
+    return converted_value
+
+
+#s = socket.socket()
+#s.connect(('192.168.4.1', 80))
+
+
+def read_wheel():
+    s.send(b"\xFF")
+    raw = s.recv(10)
+    raw_value = (int(raw.decode("ascii")))
+    delta_time = convert_speed_value(raw_value)
+    return delta_time
+
+def generate_wheel_fake():
+    lista = []
+    for row in open("wheelvalues.txt", "r"):
+        converted_value = convert_speed_value(int(row))
+        print(converted_value)
+        lista.append(converted_value)
+    return lista
+
+
+FAKE_WHEEL = cycle(generate_wheel_fake())
 
 pyglet.clock.schedule_interval(update, 1/100.0)
 pyglet.app.run()
