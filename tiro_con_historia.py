@@ -353,7 +353,26 @@ class Player(pyglet.sprite.Sprite):
             self.opacity = 255
 
 
+class Reloj(pyglet.sprite.Sprite):
+
+    def __init__(self, *args, **kwargs):
+        image = pyglet.resource.image("imagenes/reloj.png")
+        super().__init__(img=image, *args, **kwargs)
+
+        image.anchor_x = image.width / 2
+        image.anchor_y = image.height / 2
+
+        self.x = 700
+        self.y = 100
+        self.scale = 0.5
+        self.opacity = 128
+
+    def update(self, dt):
+        global delta_time
+        self.rotation = delta_time * 90
+
 player = Player()
+reloj = Reloj()
 #          1   2    3    4    5    6    7    8    9    10
 esperas = [0, 20, 130, 150, 180, 400, 420, 440, 490, 550, 600]
 objetos = []
@@ -390,6 +409,7 @@ def update(dt):
         final.update(dt)
         lluvia_2.update(dt)
         player.update(dt)
+        reloj.update(dt)
         # print(contador)
 
         # if contador == 0:
@@ -423,9 +443,10 @@ def on_draw():
         for x in objetos:
             x.draw()
 
-        label.draw()
+        #label.draw()
         lluvia_1.draw()
         final.draw()
+        reloj.draw()
     else:
         title.draw()
 
