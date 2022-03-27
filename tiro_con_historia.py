@@ -79,12 +79,13 @@ class Lluvia(pyglet.sprite.Sprite):
 
 class Pelota(pyglet.sprite.Sprite):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, espera, imagen, *args, **kwargs):
         self.vy = -5
         self.vx = 2
-        self.imagen = "imagenes/objeto_1.png"
+        self.imagen = imagen
         image = pyglet.resource.image(self.imagen)
         super().__init__(img=image, *args, **kwargs)
+        self.espera = espera
 
         image.anchor_x = image.width / 2
         image.anchor_y = image.height / 2
@@ -107,6 +108,7 @@ class Pelota(pyglet.sprite.Sprite):
                 "rotation": self.rotation,
                 "vr": self.vr,
                 "muerto": self.muerto,
+                "espera": self.espera,
         }
 
     def restaurar(self, serializado):
@@ -118,6 +120,7 @@ class Pelota(pyglet.sprite.Sprite):
         self.rotation = serializado["rotation"]
         self.vr = serializado["vr"]
         self.muerto = serializado["muerto"]
+        self.espera = serializado["espera"]
 
     def update(self, dt, player):
         global last_delta_time, dt_accum
@@ -150,11 +153,21 @@ class Pelota(pyglet.sprite.Sprite):
 
     def update_avanza(self, dt, player):
         global delta_time, dt_accum
+
+
         dt_accum += 0.01 * delta_time * 15
         dt = dt * 20
 
         while dt_accum > freq:
             dt_accum -= freq
+
+            if self.espera > 0:
+                print(self.espera)
+                self.espera -= dt
+                if self.espera < 0:
+                    self.espera = 0
+                self.history.append(self.serializar())
+                return
 
             self.y -= self.vy * dt
             self.vy += 0.2 * dt
@@ -175,7 +188,7 @@ class Pelota(pyglet.sprite.Sprite):
                     self.muerto = True
 
             if self.x > 800:
-                self.x = -50
+                self.x = 900
 
             self.rotation += self.vr * dt
 
@@ -208,8 +221,7 @@ class Player(pyglet.sprite.Sprite):
 
     def update(self, dt):
         global joystick
-
-        print(joystick.x)
+        global reversed
 
         if joystick:
             if joystick.x > 0.5:
@@ -228,9 +240,17 @@ class Player(pyglet.sprite.Sprite):
         if self.x > 800 - 80:
             self.x = 800 - 80
 
+        if reversed:
+            self.opacity = 80
+        else:
+            self.opacity = 255
+
 
 player = Player()
-pelota = Pelota()
+pelota1 = Pelota(espera=0, imagen="imagenes/objeto_1.png")
+pelota2 = Pelota(espera=200, imagen="imagenes/objeto_2.png")
+#pelota3 = Pelota(espera=600, imagen="imagenes/objeto_3.png")
+
 label = Label()
 lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800)
 lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200)
@@ -241,7 +261,10 @@ def update(dt):
     global delta_time
     # global contador
     #print(joystick.x)
-    pelota.update(dt, player)
+    pelota1.update(dt, player)
+    pelota2.update(dt, player)
+    #pelota3.update(dt, player)
+
     label.update(dt)
     lluvia_1.update(dt)
     lluvia_2.update(dt)
@@ -262,7 +285,9 @@ def on_draw():
     window.clear()
     lluvia_2.draw()
     player.draw()
-    pelota.draw()
+    pelota1.draw()
+    pelota2.draw()
+    #pelota3.draw()
     label.draw()
     lluvia_1.draw()
 
@@ -305,12 +330,12 @@ def generate_wheel_fake():
 
 FAKE_WHEEL = cycle(generate_wheel_fake())
 
-# t1 = threading.Thread(target=read_wheel)
-# t1.start()
+t1 = threading.Thread(target=read_wheel)
+t1.start()
 
 @window.event
 def on_close():
-    #t1.join()
+    t1.join()
     print("cerrando")
 
 pyglet.clock.schedule_interval(update, 1/100.0)
