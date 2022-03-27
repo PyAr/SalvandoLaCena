@@ -6,6 +6,8 @@ from pyglet.window import key
 from itertools import cycle
 import threading
 
+jugando = False
+
 wavefile_name = 'music/music.wav'
 wavefile_name_reverse = 'music/music_reversed.wav'
 
@@ -40,7 +42,6 @@ music_player.queue(song)
 music_player.loop = True
 player_reverse.queue(reversed_song)
 player_reverse.loop = True
-music_player.play()
 
 reversed = False
 
@@ -86,6 +87,90 @@ class Fondo(pyglet.sprite.Sprite):
         image = pyglet.resource.image(self.imagen)
         super().__init__(img=image, *args, **kwargs)
 
+class Title(pyglet.sprite.Sprite):
+
+    def __init__(self, *args, **kwargs):
+        image = pyglet.resource.image("imagenes/title.png")
+        super().__init__(img=image, *args, **kwargs)
+
+class Final(pyglet.sprite.Sprite):
+
+    def __init__(self, espera, *args, **kwargs):
+        image = pyglet.resource.image("imagenes/final.png")
+        super().__init__(img=image, *args, **kwargs)
+        self.espera = espera
+
+        image.anchor_x = 0
+        image.anchor_y = 0
+
+        self.x = 0
+        self.y = -600
+        self.history = []
+
+    def serializar(self):
+        return {
+                "x": self.x,
+                "y": self.y,
+                "espera": self.espera,
+        }
+
+    def restaurar(self, serializado):
+        self.x = serializado["x"]
+        self.y = serializado["y"]
+        self.espera = serializado["espera"]
+
+    def update(self, dt):
+        global last_delta_time, dt_accum
+
+        if delta_time > 0 and last_delta_time < 0:
+            dt_accum = 0
+        elif delta_time < 0 and last_delta_time > 0:
+            dt_accum = 0
+
+        if delta_time > 0:
+            self.update_avanza(dt)
+        else:
+            self.update_atras(dt)
+
+        last_delta_time = delta_time
+
+    def update_atras(self, dt):
+        global delta_time, dt_accum
+
+        dt_accum += dt * 30 * abs(delta_time)
+        step = None
+
+        while dt_accum > freq:
+            dt_accum -= freq
+            if self.history:
+                step = self.history.pop()
+
+        if step:
+            self.restaurar(step)
+
+    def update_avanza(self, dt):
+        global delta_time, dt_accum
+
+
+        dt_accum += 0.01 * delta_time * 15
+        dt = dt * 20
+
+        while dt_accum > freq:
+            dt_accum -= freq
+
+            if self.espera > 0:
+                self.espera -= dt
+                if self.espera < 0:
+                    self.espera = 0
+                self.history.append(self.serializar())
+                return
+
+            self.y += 10 * dt
+
+            if (self.y > 0):
+                self.y = 0
+
+            self.history.append(self.serializar())
 
 class Pelota(pyglet.sprite.Sprite):
 
@@ -270,48 +355,72 @@ for numero, espera in enumerate(esperas):
     objeto = Pelota(espera=espera, imagen=f"imagenes/objeto_{numero + 1}.png")
     objetos.append(objeto)
 
+final = Final(espera=750)
 
 label = Label()
 lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800)
 lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200)
 fondo = Fondo("imagenes/fondo_juego.png")
+title = Title()
 
 # contador = 60
 
 def update(dt):
     global delta_time
+    global jugando
+    global dt_accum
     # global contador
     #print(joystick.x)
-    for x in objetos:
-        x.update(dt, player)
 
-    label.update(dt)
-    lluvia_1.update(dt)
-    lluvia_2.update(dt)
-    player.update(dt)
-    # print(contador)
+    if jugando:
+        for x in objetos:
+            x.update(dt, player)
 
-    # if contador == 0:
-        # contador = 60
-        # delta_time = -read_wheel()
-    # else:
-        # contador -= 1
+        label.update(dt)
+        lluvia_1.update(dt)
+        final.update(dt)
+        lluvia_2.update(dt)
+        player.update(dt)
+        # print(contador)
 
-    #delta_time = next(FAKE_WHEEL)
-    update_direction(delta_time)
+        # if contador == 0:
+            # contador = 60
+            # delta_time = -read_wheel()
+        # else:
+            # contador -= 1
+
+        #delta_time = next(FAKE_WHEEL)
+        update_direction(delta_time)
+    else:
+        if keys[key.SPACE]:
+            if not jugando:
+                music_player.play()
+                jugando = True
+                dt_accum = 0
+            else:
+                return True
+
+
 
 @window.event
 def on_draw():
     window.clear()
-    fondo.draw()
-    lluvia_2.draw()
-    player.draw()
-        
-    for x in objetos:
-        x.draw()
 
-    label.draw()
-    lluvia_1.draw()
+    # el fondo se muestra en el menu y el juego
+    fondo.draw()
+
+    if jugando:
+        lluvia_2.draw()
+        player.draw()
+            
+        for x in objetos:
+            x.draw()
+
+        label.draw()
+        lluvia_1.draw()
+        final.draw()
+    else:
+        title.draw()
 
 
 # @window.event
@@ -324,8 +433,6 @@ def on_draw():
 def convert_speed_value(value):
     converted_value = -1*math.log10(-value+947) + 2
     return converted_value
-
-
 
 
 def read_wheel():
@@ -354,6 +461,8 @@ FAKE_WHEEL = cycle(generate_wheel_fake())
 
 t1 = threading.Thread(target=read_wheel)
 t1.start()
+
+
 
 @window.event
 def on_close():
