@@ -35,6 +35,7 @@ capas = [
     Lluvia("imagenes/lluvia-02.png", velocidad=800),
     Lluvia("imagenes/lluvia-01.png", velocidad=1200),
 ]
+
 label = Label()
 
 def update(dt):
