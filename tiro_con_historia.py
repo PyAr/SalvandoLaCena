@@ -298,11 +298,11 @@ class Pelota(pyglet.sprite.Sprite):
 class Label(pyglet.text.Label):
 
     def __init__(self):
-        super().__init__(text="test", y=10, x=10, font_size=20)
+        super().__init__(text="test", y=20, x=20, font_size=30)
 
     def update(self, dt):
         global delta_time
-        self.text = f"delta_time: {delta_time}"
+        self.text = f"velocidad: {delta_time:.2f}"
 
 class Player(pyglet.sprite.Sprite):
 
@@ -347,7 +347,7 @@ class Player(pyglet.sprite.Sprite):
 
 player = Player()
 #          1   2    3    4    5    6    7    8    9    10
-esperas = [0, 130, 150, 180, 400, 420, 440, 490, 550, 600]
+esperas = [20, 130, 150, 180, 400, 420, 440, 490, 550, 600]
 objetos = []
 
 
@@ -373,11 +373,12 @@ def update(dt):
     #print(joystick.x)
 
     if jugando:
+        lluvia_1.update(dt)
+
         for x in objetos:
             x.update(dt, player)
 
         label.update(dt)
-        lluvia_1.update(dt)
         final.update(dt)
         lluvia_2.update(dt)
         player.update(dt)
@@ -397,8 +398,6 @@ def update(dt):
                 music_player.play()
                 jugando = True
                 dt_accum = 0
-            else:
-                return True
 
 
 
