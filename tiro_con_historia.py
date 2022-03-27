@@ -1,9 +1,10 @@
 import math
-import socket
 import time
+import socket
 import pyglet
 from pyglet.window import key
 from itertools import cycle
+import threading
 
 wavefile_name = 'music/music.wav'
 wavefile_name_reverse = 'music/music_reversed.wav'
@@ -78,12 +79,13 @@ class Lluvia(pyglet.sprite.Sprite):
 
 class Pelota(pyglet.sprite.Sprite):
 
-    def __init__(self, *args, **kwargs):
-        self.vy = -5
+    def __init__(self, espera, imagen, *args, **kwargs):
+        self.vy = -10
         self.vx = 2
-        self.imagen = "imagenes/objeto_1.png"
+        self.imagen = imagen
         image = pyglet.resource.image(self.imagen)
         super().__init__(img=image, *args, **kwargs)
+        self.espera = espera
 
         image.anchor_x = image.width / 2
         image.anchor_y = image.height / 2
@@ -106,6 +108,7 @@ class Pelota(pyglet.sprite.Sprite):
                 "rotation": self.rotation,
                 "vr": self.vr,
                 "muerto": self.muerto,
+                "espera": self.espera,
         }
 
     def restaurar(self, serializado):
@@ -117,6 +120,7 @@ class Pelota(pyglet.sprite.Sprite):
         self.rotation = serializado["rotation"]
         self.vr = serializado["vr"]
         self.muerto = serializado["muerto"]
+        self.espera = serializado["espera"]
 
     def update(self, dt, player):
         global last_delta_time, dt_accum
@@ -132,6 +136,11 @@ class Pelota(pyglet.sprite.Sprite):
             self.update_atras(dt)
 
         last_delta_time = delta_time
+
+        if self.muerto:
+            self.opacity = 80
+        else:
+            self.opacity = 255
 
     def update_atras(self, dt):
         global delta_time, dt_accum
@@ -149,11 +158,20 @@ class Pelota(pyglet.sprite.Sprite):
 
     def update_avanza(self, dt, player):
         global delta_time, dt_accum
+
+
         dt_accum += 0.01 * delta_time * 15
         dt = dt * 20
 
         while dt_accum > freq:
             dt_accum -= freq
+
+            if self.espera > 0:
+                self.espera -= dt
+                if self.espera < 0:
+                    self.espera = 0
+                self.history.append(self.serializar())
+                return
 
             self.y -= self.vy * dt
             self.vy += 0.2 * dt
@@ -174,7 +192,7 @@ class Pelota(pyglet.sprite.Sprite):
                     self.muerto = True
 
             if self.x > 800:
-                self.x = -50
+                self.x = 900
 
             self.rotation += self.vr * dt
 
@@ -206,12 +224,11 @@ class Player(pyglet.sprite.Sprite):
         #       o sea "tileable"
 
     def update(self, dt):
+        global joystick
+        global reversed
 
         if joystick:
-            if joystick.x > 0.5:
-                self.x += 10
-            elif joystick.x < -0.5:
-                self.x -= 10
+            self.x += joystick.x * 10
 
         if keys[key.RIGHT]:
             self.x += 10
@@ -224,22 +241,49 @@ class Player(pyglet.sprite.Sprite):
         if self.x > 800 - 80:
             self.x = 800 - 80
 
+        if reversed:
+            self.opacity = 80
+        else:
+            self.opacity = 255
+
 
 player = Player()
-pelota = Pelota()
+#          1   2    3    4    5    6    7    8    9    10
+esperas = [0, 130, 200, 220, 260, 280, 350, 390, 450, 500]
+objetos = []
+
+
+for numero, espera in enumerate(esperas):
+    objeto = Pelota(espera=espera, imagen=f"imagenes/objeto_{numero + 1}.png")
+    objetos.append(objeto)
+
+
 label = Label()
 lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800)
 lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200)
 
+# contador = 60
+
 def update(dt):
     global delta_time
+    # global contador
     #print(joystick.x)
-    pelota.update(dt, player)
+    for x in objetos:
+        x.update(dt, player)
+
     label.update(dt)
     lluvia_1.update(dt)
     lluvia_2.update(dt)
     player.update(dt)
-    delta_time = next(FAKE_WHEEL)
+    # print(contador)
+
+    # if contador == 0:
+        # contador = 60
+        # delta_time = -read_wheel()
+    # else:
+        # contador -= 1
+
+    #delta_time = next(FAKE_WHEEL)
     update_direction(delta_time)
 
 @window.event
@@ -247,9 +291,13 @@ def on_draw():
     window.clear()
     lluvia_2.draw()
     player.draw()
-    pelota.draw()
+        
+    for x in objetos:
+        x.draw()
+
     label.draw()
     lluvia_1.draw()
+
 
 # @window.event
 # def on_mouse_motion(x, y, dx, dy):
@@ -263,16 +311,21 @@ def convert_speed_value(value):
     return converted_value
 
 
-#s = socket.socket()
-#s.connect(('192.168.4.1', 80))
 
 
 def read_wheel():
-    s.send(b"\xFF")
-    raw = s.recv(10)
-    raw_value = (int(raw.decode("ascii")))
-    delta_time = convert_speed_value(raw_value)
-    return delta_time
+    global delta_time
+
+    s = socket.socket()
+    s.connect(('192.168.4.1', 80))
+
+    while True:
+        time.sleep(.1)
+
+        s.send(b"\xFF")
+        raw = s.recv(10)
+        raw_value = (int(raw.decode("ascii")))
+        delta_time = -convert_speed_value(raw_value)
 
 def generate_wheel_fake():
     lista = []
@@ -283,6 +336,14 @@ def generate_wheel_fake():
 
 
 FAKE_WHEEL = cycle(generate_wheel_fake())
+
+t1 = threading.Thread(target=read_wheel)
+t1.start()
+
+@window.event
+def on_close():
+    t1.join()
+    print("cerrando")
 
 pyglet.clock.schedule_interval(update, 1/100.0)
 pyglet.app.run()
