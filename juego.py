@@ -2,7 +2,6 @@ import pyglet
 import pyglet.window.key
 from pyglet.window import mouse
 from pyglet import shapes
-import time
 
 #global window
 window = pyglet.window.Window(style = pyglet.window.Window.WINDOW_STYLE_DIALOG, resizable = True, caption = 'Salvando La Cena')
@@ -26,7 +25,6 @@ def on_draw():
 	
 @window.event
 def on_key_press(symbol, modifier):
-	#Si se presiona la tecla ESCAPE:
 	if symbol == pyglet.window.key.ESCAPE:
 		window.close()
 @window.event
@@ -42,20 +40,14 @@ def makeMenu(length, height):
 	horizontal_middle = length/2
 	vertical_middle = height/2
 	
-	#Boton de Inicio
 	button_1 = shapes.Rectangle(horizontal_middle - 100, vertical_middle + 50, 200, 40,color=(0, 0, 0), batch=batch)
-	
-	#Boton para Cerrar
 	Button_2 = shapes.Rectangle(horizontal_middle - 120, vertical_middle - 10, 240, 40,color=(0, 0, 0) ,batch=batch)
 	
-	#Texto de boton 1
 	label_1 = pyglet.text.Label('Iniciar',
 								font_name='Calibri',
 								font_size=20,
 								x= horizontal_middle - 45,
 								y= vertical_middle + 60)
-
-	#Texto de boton 2
 	label_2 = pyglet.text.Label('Cerrar = ESCAPE',
 								font_name='Calibri',
 								font_size=20,
