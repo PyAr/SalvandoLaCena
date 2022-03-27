@@ -175,6 +175,11 @@ class Final(pyglet.sprite.Sprite):
 class Pelota(pyglet.sprite.Sprite):
 
     def __init__(self, espera, imagen, *args, **kwargs):
+        self.especial = False
+
+        if espera == 0:
+            self.especial = True
+
         self.vy = -10
         self.vx = 2
         self.imagen = imagen
@@ -236,6 +241,9 @@ class Pelota(pyglet.sprite.Sprite):
             self.opacity = 80
         else:
             self.opacity = 255
+
+        if self.especial:
+            self.opacity = 0
 
     def update_atras(self, dt):
         global delta_time, dt_accum
@@ -347,12 +355,12 @@ class Player(pyglet.sprite.Sprite):
 
 player = Player()
 #          1   2    3    4    5    6    7    8    9    10
-esperas = [20, 130, 150, 180, 400, 420, 440, 490, 550, 600]
+esperas = [0, 20, 130, 150, 180, 400, 420, 440, 490, 550, 600]
 objetos = []
 
 
 for numero, espera in enumerate(esperas):
-    objeto = Pelota(espera=espera, imagen=f"imagenes/objeto_{numero + 1}.png")
+    objeto = Pelota(espera=espera, imagen=f"imagenes/objeto_{numero}.png")
     objetos.append(objeto)
 
 final = Final(espera=750)
