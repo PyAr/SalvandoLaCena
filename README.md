@@ -11,6 +11,13 @@ pip install -r requirements.txt
 ```
 
 
+## Cómo jugar:
+
+```
+python3 tiro_con_historia.py
+```
+
+
 ## De qué se trata:
 
 ### La anécdota
