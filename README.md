@@ -38,6 +38,8 @@ atrás en el tiempo sino también variar la velocidad suavemente, tanto
 para adelante como para atrás.  Para probar, se puede emular el
 volante moviendo el mouse en la pantalla.
 
+![el volante](./volante.jpeg)
+
 La persona que controla al personaje lo hace con un joystick, aunque
 también se pueden usar las flechitas del teclado para probar. El
 personaje tiene el poder de que no obedece a los cambios de tiempo, y
