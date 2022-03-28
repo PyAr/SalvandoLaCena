@@ -51,3 +51,10 @@ también se pueden usar las flechitas del teclado para probar. El
 personaje tiene el poder de que no obedece a los cambios de tiempo, y
 esto es lo que hace al juego súper divertido y colaborativo entre lxs
 dos jugadorxs.
+
+### El juego
+
+No podía faltar el juego en acción
+
+![la imagen del juego en acción](./captura.webp)
+

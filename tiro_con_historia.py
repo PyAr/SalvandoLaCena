@@ -12,8 +12,8 @@ wavefile_name = 'music/music.wav'
 wavefile_name_reverse = 'music/music_reversed.wav'
 
 window = pyglet.window.Window(800, 600)
-last_delta_time = 1
-delta_time = 1
+last_delta_time = 0.5
+delta_time = 0.5
 freq = 0.05
 dt_accum = 0
 COLCHON = 140
@@ -439,7 +439,7 @@ def on_draw():
     if jugando:
         lluvia_2.draw()
         player.draw()
-            
+
         for x in objetos:
             x.draw()
 
