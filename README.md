@@ -32,11 +32,10 @@ de un lado a otro de la pantalla, haciéndolas rebotar y evitando que
 caigan al suelo, salvando así a la cena.
 
 La persona que controla el tiempo lo hace con un volante pegado a un
-potenciómetro (*ARREGLAME* foto del volante acá) que se comunica por
-wifi al proceso del juego. Con esto no solamente se puede ir para
-atrás en el tiempo sino también variar la velocidad suavemente, tanto
-para adelante como para atrás.  Para probar, se puede emular el
-volante moviendo el mouse en la pantalla.
+potenciómetro que se comunica por wifi al proceso del juego. Con esto
+no solamente se puede ir para atrás en el tiempo sino también variar
+la velocidad suavemente, tanto para adelante como para atrás.  Para
+probar, se puede emular el volante moviendo el mouse en la pantalla.
 
 ![el volante](./volante.jpeg)
 
