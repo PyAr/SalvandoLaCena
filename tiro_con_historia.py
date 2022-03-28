@@ -43,24 +43,24 @@ music_player.loop = True
 player_reverse.queue(reversed_song)
 player_reverse.loop = True
 
-reversed = False
+para_atras = False
 
 def update_direction(delta_time):
     #player.pitch = delta_time + 1
     music_player.pitch = abs(delta_time) * 1.4
     #player_reverse.pitch = delta_time*-1 + 1
     player_reverse.pitch = abs(delta_time) * 1.4
-    global reversed
-    if reversed:
+    global para_atras
+    if para_atras:
         if delta_time >= 0:
             player_reverse.pause()
             music_player.play()
-            reversed = False
+            para_atras = False
     else:
         if delta_time < 0:
             music_player.pause()
             player_reverse.play()
-            reversed = True
+            para_atras = True
 
 
 class Lluvia(pyglet.sprite.Sprite):
@@ -330,7 +330,7 @@ class Player(pyglet.sprite.Sprite):
 
     def update(self, dt):
         global joystick
-        global reversed
+        global para_atras
 
         if joystick:
             if joystick.x < -0.2 or joystick.x > 0.2:
@@ -347,7 +347,7 @@ class Player(pyglet.sprite.Sprite):
         if self.x > 800 - 80:
             self.x = 800 - 80
 
-        if reversed:
+        if para_atras:
             self.opacity = 80
         else:
             self.opacity = 255
