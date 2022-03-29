@@ -262,21 +262,23 @@ class Pelota(pyglet.sprite.Sprite):
             self.muerto = True
             self.opacity = 80
 
+        # forma extraña de detectar si el objeto está bajando: si el
+        # tween que cambia el "y" tiene cierta función
+        bajando = tweens[i - 1][1].f == easeInQuad
+
         if para_atras:
             # si el objeto está subiendo en reversa, borrar el futuro
-            if tweens[i - 1][1].f == easeInQuad and len(self.history) > i:
+            if bajando and len(self.history) > i:
                 while len(self.history) > i:
                     self.history.pop()
         else:
-            # si el objeto está bajando
-            if tweens[i - 1][1].f == easeInQuad and not self.muerto:
-                if ALTURA_SUELO < self.y <= ALTURA_COLCHON:
-                    if abs(player.x - self.x) < 100:
-                        # rebota
-                        new_tweens = self._crear_tweens(
-                            T, self.x, self.y, self.rotation
-                        )
-                        self.history.extend(new_tweens)
+            if bajando and not self.muerto and ALTURA_SUELO < self.y <= ALTURA_COLCHON:
+                if abs(player.x - self.x) < 100:
+                    # rebota
+                    new_tweens = self._crear_tweens(
+                        T, self.x, self.y, self.rotation
+                    )
+                    self.history.extend(new_tweens)
 
 
 class Label(pyglet.text.Label):
