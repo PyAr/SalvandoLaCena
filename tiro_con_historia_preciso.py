@@ -342,9 +342,9 @@ class Reloj(pyglet.sprite.Sprite):
         image.anchor_x = image.width / 2
         image.anchor_y = image.height / 2
 
-        self.x = 700
-        self.y = 100
-        self.scale = 0.5
+        self.x = 50
+        self.y = 545
+        self.scale = 0.3
         self.opacity = 128
 
     def update(self, dt):
