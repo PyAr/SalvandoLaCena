@@ -1,3 +1,4 @@
+import sys
 import math
 import time
 import socket
@@ -11,7 +12,11 @@ jugando = False
 wavefile_name = "music/music.wav"
 wavefile_name_reverse = "music/music_reversed.wav"
 
-window = pyglet.window.Window(800, 600)
+fullscreen = False
+if len(sys.argv) > 1 and ("-f" in sys.argv or "--fullscreen" in sys.argv):
+    fullscreen = True
+
+window = pyglet.window.Window(800, 600, fullscreen=fullscreen)
 delta_time = 1
 FRAME_TIME = 1 / 60
 
