@@ -265,22 +265,36 @@ class Label(pyglet.text.Label):
 
 class Player(pyglet.sprite.Sprite):
     def __init__(self, *args, **kwargs):
-        image = pyglet.resource.image("imagenes/player.png")
-        super().__init__(img=image, *args, **kwargs)
+        imagenes = [
+            pyglet.resource.image("imagenes/player.png"),
+            pyglet.resource.image("imagenes/player_1.png"),
+            pyglet.resource.image("imagenes/player_2.png"),
+        ]
+        for image in imagenes:
+            image.anchor_x = image.width / 2
+            image.anchor_y = image.height / 2
+        super().__init__(img=imagenes[1], *args, **kwargs)
 
-        image.anchor_x = image.width / 2
-        image.anchor_y = image.height / 2
+        self.idx_animacion = 0
+        self.animacion = [
+            imagenes[0],
+            imagenes[1],
+            imagenes[0],
+            imagenes[2],
+        ]
+        self.dt_ani_accum = 0
+        self.tiempo_animacion = 0.05
+
         self.scale = 0.8
 
         self.x = 100
         self.y = 80
 
-        # TODO: intentar hacer que el movimiento se conecte
-        #       o sea "tileable"
-
     def update(self, dt):
         global joystick
         global para_atras
+
+        x_anterior = self.x
 
         if joystick:
             if joystick.x < -0.2 or joystick.x > 0.2:
@@ -296,6 +310,23 @@ class Player(pyglet.sprite.Sprite):
 
         if self.x > 800 - 80:
             self.x = 800 - 80
+
+        # entre 0 y 20
+        dx = abs(self.x - x_anterior)
+
+        if dx == 0 and (self.idx_animacion != 0 or self.idx_animacion != 2):
+            self.idx_animacion = 0
+            self.image = self.animacion[0]
+        else:
+            if self.dt_ani_accum + dt < self.tiempo_animacion * 20 / dx:
+                self.dt_ani_accum += dt
+            else:
+                self.dt_ani_accum = 0
+                if self.idx_animacion + 1 < len(self.animacion):
+                    self.idx_animacion += 1
+                else:
+                    self.idx_animacion = 0
+                self.image = self.animacion[self.idx_animacion]
 
         if para_atras:
             self.opacity = 80
