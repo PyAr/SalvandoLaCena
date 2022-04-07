@@ -1,6 +1,7 @@
 import sys
 import math
 import time
+import random
 import socket
 import pyglet
 from pyglet.window import key
@@ -18,6 +19,7 @@ if len(sys.argv) > 1 and ("-f" in sys.argv or "--fullscreen" in sys.argv):
 
 window = pyglet.window.Window(800, 600, fullscreen=fullscreen)
 delta_time = 1
+current_subframe = 0
 FRAME_TIME = 1 / 60
 
 # se puede jugar con esta resolución para que el
@@ -58,6 +60,10 @@ player_reverse.loop = True
 para_atras = False
 
 
+def get_current_frame():
+    return int(current_subframe / SUBFRAMES)
+
+
 def update_direction(delta_time):
     # player.pitch = delta_time + 1
     music_player.pitch = abs(delta_time) * 1.4
@@ -92,6 +98,58 @@ class Lluvia(pyglet.sprite.Sprite):
 
     def update(self, dt):
         self.textura.anchor_y += dt * delta_time * self.velocidad
+
+
+class Chispear(pyglet.sprite.Sprite):
+    imagenes = [
+        pyglet.resource.image("imagenes/chispear_0.png"),
+        pyglet.resource.image("imagenes/chispear_1.png"),
+        pyglet.resource.image("imagenes/chispear_2.png"),
+        pyglet.resource.image("imagenes/chispear_3.png"),
+    ]
+    for i in imagenes:
+        i.anchor_x = i.width / 2
+
+    def __init__(self, seed, freq=10, desfase=0, *args, **kwargs):
+        self.seed = seed
+        self.freq = freq
+        self.desfase = desfase
+        super().__init__(img=self.imagenes[0], *args, **kwargs)
+        self.last_frame = float("inf")
+        self.rng = random.Random()
+        self.opacity = 200
+        self.scale = 0.6
+        self.frames_repetidos = 2
+
+    def punto_en_suelo(self):
+        return (
+            self.rng.randint(0, 800),
+            self.rng.randint(0, 80),
+        )
+
+    def punto_en_techo(self):
+        rx = self.rng.random()
+        ry = self.rng.random() * rx
+        return (
+            600 + rx * 200,
+            410 + ry * 100,
+        )
+
+    def update(self):
+        current_frame = get_current_frame()
+        frame = (current_frame + self.desfase) % self.freq
+        if frame < len(self.imagenes) * self.frames_repetidos:
+            if current_frame + self.desfase - frame != self.last_frame:
+                self.last_frame = current_frame + self.desfase - frame
+                self.rng.seed(current_frame + self.desfase - frame + self.seed)
+
+                f = random.choice([self.punto_en_techo, self.punto_en_suelo])
+                self.x, self.y = f()
+
+            self.visible = True
+            self.image = self.imagenes[int(frame / self.frames_repetidos)]
+        else:
+            self.visible = False
 
 
 class Fondo(pyglet.sprite.Sprite):
@@ -260,7 +318,7 @@ class Label(pyglet.text.Label):
 
     def update(self, dt):
         global delta_time
-        self.text = f"velocidad: {delta_time:.2f}"
+        self.text = f"velocidad: {delta_time:.2f}, frame: {get_current_frame()}"
 
 
 class Player(pyglet.sprite.Sprite):
@@ -355,6 +413,14 @@ class Reloj(pyglet.sprite.Sprite):
 player = Player()
 reloj = Reloj()
 
+chispear = [
+    Chispear(902, 8),
+    Chispear(555, 8, 4),
+    Chispear(112, 8, 6),
+    Chispear(787, 20),
+    Chispear(878, 20, 4),
+]
+
 esperas = [1, 10, 11, 20, 22, 25, 30, 31, 38, 39]
 objetos = []
 
@@ -373,6 +439,7 @@ title = Title()
 
 
 def update_objetos(dt):
+    global current_subframe
     global dt_accum
 
     if delta_time == 0:
@@ -386,10 +453,16 @@ def update_objetos(dt):
 
     dt_accum = 0
 
-    frames = math.ceil(dt / delta_frame)
-    for f in range(frames):
+    subframes = math.ceil(dt / delta_frame)
+    for f in range(subframes):
+        if delta_time > 0:
+            current_subframe += 1
+        else:
+            current_subframe -= 1
         for x in objetos:
             x.update(delta_time > 0, player)
+        for c in chispear:
+            c.update()
         final.update(delta_time > 0)
 
 
@@ -422,6 +495,10 @@ def on_draw():
 
     if jugando:
         lluvia_2.draw()
+
+        for c in chispear:
+            c.draw()
+
         player.draw()
 
         for x in objetos:
