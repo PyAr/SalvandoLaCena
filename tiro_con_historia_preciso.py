@@ -21,6 +21,7 @@ window = pyglet.window.Window(800, 600, fullscreen=fullscreen)
 delta_time = 1
 current_subframe = 0
 FRAME_TIME = 1 / 60
+FRAME_ESTADISTICAS = 1815
 
 # se puede jugar con esta resolución para que el
 # slow-motion se vea más suave, pero mientras más
@@ -171,12 +172,13 @@ class Final(pyglet.sprite.Sprite):
         super().__init__(img=image, *args, **kwargs)
         self.espera = espera
 
-        image.anchor_x = 0
-        image.anchor_y = 0
+        image.anchor_x = image.width / 2
+        image.anchor_y = image.height
 
-        self.x = 0
-        self.y = -600
+        self.x = 400
+        self.y = 0
         self.history = []
+        self.scale = 0.3
 
     def serializar(self):
         return (
@@ -209,10 +211,104 @@ class Final(pyglet.sprite.Sprite):
             self.history.append(self.serializar())
             return
 
-        if self.y < 0:
-            self.y = min(0, self.y + 10 / SUBFRAMES)
+        if self.y < 600:
+            self.y = min(600, self.y + 40 / SUBFRAMES)
 
         self.history.append(self.serializar())
+
+
+class Estadisticas(pyglet.graphics.Batch):
+    def __init__(self):
+        super().__init__()
+        self.titulo = pyglet.text.Label(
+            font_name="Sans Serif",
+            font_size=30,
+            color=(40, 40, 40, 255),
+            bold=True,
+            x=window.width / 2,
+            y=window.height / 2 + 50,
+            anchor_x="center",
+            anchor_y="center",
+            batch=self,
+        )
+
+        self.labels = []
+        for i in range(7):
+            self.labels.append(
+                pyglet.text.Label(
+                    font_name="Sans Serif",
+                    font_size=20,
+                    color=(40, 40, 40, 255),
+                    bold=True,
+                    x=window.width / 2,
+                    y=window.height / 2 - 40 * i,
+                    anchor_x="center",
+                    anchor_y="center",
+                    batch=self,
+                )
+            )
+
+        self.actualizado = False
+
+    def actualizar(self):
+        todos_salvados = True
+        for o in objetos:
+            if o.muerto:
+                todos_salvados = False
+                break
+
+        if todos_salvados:
+            self.titulo.text = "¡SALVASTE TODO!"
+        else:
+            self.titulo.text = "Lograste salvar…"
+
+        """
+        0: comida
+        1: sombrero
+        2: tech
+        3: comida
+        4: oveja
+        5: logo
+        6: bebida
+        7: tech
+        8: bebida
+        9: leña
+        """
+
+        comidas = 0
+        if not objetos[0].muerto:
+            comidas += 1
+        if not objetos[3].muerto:
+            comidas += 1
+
+        bebidas = 0
+        if not objetos[6].muerto:
+            bebidas += 1
+        if not objetos[8].muerto:
+            bebidas += 1
+
+        tech = 0
+        if not objetos[2].muerto:
+            tech += 1
+        if not objetos[7].muerto:
+            tech += 1
+
+        self.labels[0].text = f"{comidas} de 2 comidas"
+        self.labels[1].text = f"{bebidas} de 2 bebidas"
+        self.labels[2].text = f"{tech} de 2 artefactos tecnológicos"
+        self.labels[3].text = "ningún" if objetos[1].muerto else "un" + " sombrero"
+        self.labels[4].text = "ninguna" if objetos[4].muerto else "una" + " oveja"
+        self.labels[5].text = "ningún" if objetos[5].muerto else "un" + " logo"
+        self.labels[6].text = "no hay" if objetos[9].muerto else "habemus" + " leña"
+
+    def update(self):
+        if get_current_frame() < FRAME_ESTADISTICAS:
+            if self.actualizado:
+                self.actualizado = False
+        else:
+            if not self.actualizado:
+                self.actualizar()
+                self.actualizado = True
 
 
 class Pelota(pyglet.sprite.Sprite):
@@ -308,13 +404,16 @@ class Pelota(pyglet.sprite.Sprite):
         # El objeto llega a la derecha de la pantalla:
         if self.x > 800:
             self.x = 900
+            self.vx = 0
+            self.vy = 0
+            self.vr = 0
 
         self.history.append(self.serializar())
 
 
 class Label(pyglet.text.Label):
     def __init__(self):
-        super().__init__(text="test", y=20, x=20, font_size=30)
+        super().__init__(y=20, x=20, font_size=30)
 
     def update(self, dt):
         global delta_time
@@ -428,10 +527,10 @@ for numero, espera in enumerate(esperas):
     objeto = Pelota(espera=espera * 0.6, imagen=f"imagenes/objeto_{numero+1}.png")
     objetos.append(objeto)
 
-final = Final(espera=52 * 0.6)
+final = Final(espera=50 * 0.6)
+estadisticas = Estadisticas()
 
-
-label = Label()
+# label = Label()
 lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800)
 lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200)
 fondo = Fondo("imagenes/fondo_juego.png")
@@ -474,10 +573,11 @@ def update(dt):
     if jugando:
         lluvia_1.update(dt)
         update_objetos(dt)
-        label.update(dt)
+        # label.update(dt)
         lluvia_2.update(dt)
         player.update(dt)
         reloj.update(dt)
+        estadisticas.update()
         update_direction(delta_time)
     else:
         if keys[key.SPACE]:
@@ -507,6 +607,10 @@ def on_draw():
         # label.draw()
         lluvia_1.draw()
         final.draw()
+
+        if get_current_frame() > FRAME_ESTADISTICAS:
+            estadisticas.draw()
+
         reloj.draw()
     else:
         title.draw()
