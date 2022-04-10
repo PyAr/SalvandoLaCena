@@ -166,18 +166,56 @@ class Title(pyglet.sprite.Sprite):
         super().__init__(img=image, *args, **kwargs)
 
 
-class Final(pyglet.sprite.Sprite):
+class SpriteConHistoria(pyglet.sprite.Sprite):
+    def __init__(self, espera, *args, **kwargs):
+        self.espera = espera
+        self.history = []
+        super().__init__(*args, **kwargs)
+
+    def serializar(self):
+        raise NotImplementedError
+
+    def restaurar(self, serializado):
+        raise NotImplementedError
+
+    def actualizar(self):
+        raise NotImplementedError
+
+    def update(self, avanzando, *args, **kwargs):
+        if avanzando:
+            self.update_avanza(*args, **kwargs)
+        else:
+            self.update_atras(*args, **kwargs)
+
+    def update_atras(self, *args, **kwargs):
+        if len(self.history):
+            self.restaurar(self.history.pop())
+        else:
+            self.espera += FRAME_TIME / SUBFRAMES
+
+    def update_avanza(self, *args, **kwargs):
+        if len(self.history) == 0:
+            self.history.append(self.serializar())
+
+        if self.espera > 0:
+            self.espera -= FRAME_TIME / SUBFRAMES
+            self.history.append(self.serializar())
+            return
+
+        self.actualizar(*args, **kwargs)
+        self.history.append(self.serializar())
+
+
+class Final(SpriteConHistoria):
     def __init__(self, espera, *args, **kwargs):
         image = pyglet.resource.image("imagenes/final.png")
-        super().__init__(img=image, *args, **kwargs)
-        self.espera = espera
+        super().__init__(espera=espera, img=image, *args, **kwargs)
 
         image.anchor_x = image.width / 2
         image.anchor_y = image.height
 
         self.x = 400
         self.y = 0
-        self.history = []
         self.scale = 0.3
 
     def serializar(self):
@@ -192,31 +230,9 @@ class Final(pyglet.sprite.Sprite):
             self.espera,
         ) = serializado
 
-    def update(self, direccion):
-        if direccion > 0:
-            self.update_avanza(player)
-        else:
-            self.update_atras()
-
-    def update_atras(self):
-        if len(self.history):
-            self.restaurar(self.history.pop())
-        else:
-            self.espera += FRAME_TIME / SUBFRAMES
-
-    def update_avanza(self, player):
-        if len(self.history) == 0:
-            self.history.append(self.serializar())
-
-        if self.espera > 0:
-            self.espera -= FRAME_TIME / SUBFRAMES
-            self.history.append(self.serializar())
-            return
-
+    def actualizar(self):
         if self.y < 600:
             self.y = min(600, self.y + 40 / SUBFRAMES)
-
-        self.history.append(self.serializar())
 
 
 class Estadisticas(pyglet.graphics.Batch):
@@ -313,12 +329,10 @@ class Estadisticas(pyglet.graphics.Batch):
                 self.actualizado = True
 
 
-class Pelota(pyglet.sprite.Sprite):
+class Pelota(SpriteConHistoria):
     def __init__(self, espera, imagen, *args, **kwargs):
-        self.espera = espera
-
         image = pyglet.resource.image(imagen)
-        super().__init__(img=image, *args, **kwargs)
+        super().__init__(espera=espera, img=image, *args, **kwargs)
 
         image.anchor_x = image.width / 2
         image.anchor_y = image.height / 2
@@ -332,7 +346,6 @@ class Pelota(pyglet.sprite.Sprite):
         self.vr = 5
 
         self.muerto = False
-        self.history = []
 
     def serializar(self):
         return (
@@ -361,10 +374,7 @@ class Pelota(pyglet.sprite.Sprite):
     def update(self, direccion, player):
         self.muerto_anterior = self.muerto
 
-        if direccion > 0:
-            self.update_avanza(player)
-        else:
-            self.update_atras()
+        super().update(direccion, player)
 
         if self.muerto != self.muerto_anterior:
             if self.muerto:
@@ -372,21 +382,7 @@ class Pelota(pyglet.sprite.Sprite):
             else:
                 self.opacity = 255
 
-    def update_atras(self):
-        if len(self.history):
-            self.restaurar(self.history.pop())
-        else:
-            self.espera += FRAME_TIME / SUBFRAMES
-
-    def update_avanza(self, player):
-        if len(self.history) == 0:
-            self.history.append(self.serializar())
-
-        if self.espera > 0:
-            self.espera -= FRAME_TIME / SUBFRAMES
-            self.history.append(self.serializar())
-            return
-
+    def actualizar(self, player):
         self.x += self.vx / SUBFRAMES
         self.y += self.vy / SUBFRAMES
         self.vy -= 0.2 / SUBFRAMES
@@ -411,8 +407,6 @@ class Pelota(pyglet.sprite.Sprite):
             self.vx = 0
             self.vy = 0
             self.vr = 0
-
-        self.history.append(self.serializar())
 
 
 class Label(pyglet.text.Label):
