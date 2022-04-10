@@ -483,10 +483,38 @@ class Player(pyglet.sprite.Sprite):
                     self.idx_animacion = 0
                 self.image = self.animacion[self.idx_animacion]
 
-        if para_atras:
-            self.opacity = 80
-        else:
-            self.opacity = 255
+
+class Sombra(SpriteConHistoria):
+    def __init__(self, player, *args, **kwargs):
+        self.player = player
+        super().__init__(espera=0, img=self.player.image, *args, **kwargs)
+        self.scale = self.player.scale
+        self.x = self.player.x
+        self.y = self.player.y
+        self.opacity = 128
+        self.visible = False
+
+    def serializar(self):
+        return (
+            self.player.x,
+            self.player.image,
+        )
+
+    def restaurar(self, serializado):
+        (
+            self.x,
+            self.image,
+        ) = serializado
+
+    def update(self, avanzando):
+        super().update(avanzando)
+        if avanzando and self.visible:
+            self.visible = False
+        elif not avanzando and not self.visible:
+            self.visible = True
+
+    def actualizar(self):
+        pass
 
 
 class Reloj(pyglet.sprite.Sprite):
@@ -508,6 +536,7 @@ class Reloj(pyglet.sprite.Sprite):
 
 
 player = Player()
+sombra = Sombra(player)
 reloj = Reloj()
 
 chispear = [
@@ -560,6 +589,7 @@ def update_objetos(dt):
             x.update(delta_time > 0, player)
         for c in chispear:
             c.update()
+        sombra.update(delta_time > 0)
         final.update(delta_time > 0)
 
 
@@ -570,13 +600,13 @@ def update(dt):
 
     if jugando:
         lluvia_1.update(dt)
-        update_objetos(dt)
         # label.update(dt)
         lluvia_2.update(dt)
         player.update(dt)
         reloj.update(dt)
         estadisticas.update()
         update_direction(delta_time)
+        update_objetos(dt)
     else:
         if keys[key.SPACE]:
             if not jugando:
@@ -597,6 +627,7 @@ def on_draw():
         for c in chispear:
             c.draw()
 
+        sombra.draw()
         player.draw()
 
         for x in objetos:
