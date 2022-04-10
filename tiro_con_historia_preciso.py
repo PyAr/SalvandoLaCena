@@ -201,6 +201,8 @@ class Final(pyglet.sprite.Sprite):
     def update_atras(self):
         if len(self.history):
             self.restaurar(self.history.pop())
+        else:
+            self.espera += FRAME_TIME / SUBFRAMES
 
     def update_avanza(self, player):
         if len(self.history) == 0:
@@ -373,6 +375,8 @@ class Pelota(pyglet.sprite.Sprite):
     def update_atras(self):
         if len(self.history):
             self.restaurar(self.history.pop())
+        else:
+            self.espera += FRAME_TIME / SUBFRAMES
 
     def update_avanza(self, player):
         if len(self.history) == 0:
