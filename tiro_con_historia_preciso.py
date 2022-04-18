@@ -314,10 +314,10 @@ class Estadisticas(pyglet.graphics.Batch):
         self.labels[0].text = f"{comidas} de 2 comidas"
         self.labels[1].text = f"{bebidas} de 2 bebidas"
         self.labels[2].text = f"{tech} de 2 artefactos tecnológicos"
-        self.labels[3].text = "ningún" if objetos[1].muerto else "un" + " sombrero"
-        self.labels[4].text = "ninguna" if objetos[4].muerto else "una" + " oveja"
-        self.labels[5].text = "ningún" if objetos[5].muerto else "un" + " logo"
-        self.labels[6].text = "no hay" if objetos[9].muerto else "habemus" + " leña"
+        self.labels[3].text = ("ningún" if objetos[1].muerto else "un") + " sombrero"
+        self.labels[4].text = ("ninguna" if objetos[4].muerto else "una") + " oveja"
+        self.labels[5].text = ("ningún" if objetos[5].muerto else "un") + " logo"
+        self.labels[6].text = ("no hay" if objetos[9].muerto else "habemus") + " leña"
 
     def update(self):
         if get_current_frame() < FRAME_ESTADISTICAS:
