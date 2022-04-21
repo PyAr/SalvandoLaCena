@@ -14,9 +14,14 @@ pip install -r requirements.txt
 ## Cómo jugar:
 
 ```
-python3 tiro_con_historia.py
+python3 main.py
 ```
 
+O para jugar la versión a la que llegamos en el pycamp:
+
+```
+python3 main_pycamp.py
+```
 
 ## De qué se trata:
 
@@ -57,4 +62,3 @@ dos jugadorxs.
 No podía faltar el juego en acción
 
 ![la imagen del juego en acción](./captura.webp)
-
