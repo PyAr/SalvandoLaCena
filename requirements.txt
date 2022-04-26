@@ -1,1 +1,2 @@
 pyglet==1.5.23
+adafruit-ampy==1.1.0
