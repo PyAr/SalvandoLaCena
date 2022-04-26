@@ -10,7 +10,7 @@ import pyglet
 from pyglet.gl import *
 from pyglet.window import key
 
-from constants import FRAME_ESTADISTICAS, FRAME_TIME, SUBFRAMES, COLCHON, SUELO
+from constants import COLCHON, FRAME_ESTADISTICAS, FRAME_TIME, SUBFRAMES, SUELO
 from loggable_items import Final, Pelota, Sombra
 
 jugando = False
