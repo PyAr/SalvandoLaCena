@@ -1,13 +1,14 @@
-import sys
 import math
-import time
 import random
 import socket
-import pyglet
-from pyglet.window import key
-from itertools import cycle
+import sys
 import threading
+import time
+from itertools import cycle
+
+import pyglet
 from pyglet.gl import *
+from pyglet.window import key
 
 jugando = False
 
@@ -621,7 +622,7 @@ def on_draw():
     glPushMatrix()
     x = int(window.width / 2)
     a = window.width / float(window.height)
-    glTranslatef(-400, -600/2, -521)
+    glTranslatef(-400, -600 / 2, -521)
 
     # el fondo se muestra en el menu y el juego
     fondo.draw()
@@ -700,11 +701,11 @@ def on_mouse_motion(x, y, dx, dy):
 
 @window.event
 def on_resize(width, height):
-    glViewport(0, 0, int(height/0.75), height)
+    glViewport(0, 0, int(height / 0.75), height)
     return pyglet.event.EVENT_HANDLED
 
 
 window.set_minimum_size(400, 300)
-gluPerspective(60., window.width / float(window.height), .1, 1000.)
+gluPerspective(60.0, window.width / float(window.height), 0.1, 1000.0)
 pyglet.clock.schedule_interval(update, 1 / 100.0)
 pyglet.app.run()
