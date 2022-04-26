@@ -7,6 +7,7 @@ import pyglet
 from pyglet.window import key
 from itertools import cycle
 import threading
+from pyglet.gl import *
 
 jugando = False
 
@@ -17,7 +18,7 @@ fullscreen = False
 if len(sys.argv) > 1 and ("-f" in sys.argv or "--fullscreen" in sys.argv):
     fullscreen = True
 
-window = pyglet.window.Window(800, 600, fullscreen=fullscreen)
+window = pyglet.window.Window(800, 600, fullscreen=fullscreen, resizable=True)
 delta_time = 1
 current_subframe = 0
 FRAME_TIME = 1 / 60
@@ -617,6 +618,10 @@ def update(dt):
 @window.event
 def on_draw():
     window.clear()
+    glPushMatrix()
+    x = int(window.width / 2)
+    a = window.width / float(window.height)
+    glTranslatef(-400, -600/2, -521)
 
     # el fondo se muestra en el menu y el juego
     fondo.draw()
@@ -643,6 +648,8 @@ def on_draw():
         reloj.draw()
     else:
         title.draw()
+
+    glPopMatrix()
 
 
 def convert_speed_value(value):
@@ -691,5 +698,13 @@ def on_mouse_motion(x, y, dx, dy):
     delta_time = (x - 400) / 200.0
 
 
+@window.event
+def on_resize(width, height):
+    glViewport(0, 0, int(height/0.75), height)
+    return pyglet.event.EVENT_HANDLED
+
+
+window.set_minimum_size(400, 300)
+gluPerspective(60., window.width / float(window.height), .1, 1000.)
 pyglet.clock.schedule_interval(update, 1 / 100.0)
 pyglet.app.run()
