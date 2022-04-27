@@ -1,7 +1,9 @@
 import pyglet
+pyglet.resource.path = ['..']
 
 window = pyglet.window.Window(800, 600)
 delta_time = 1
+
 
 class Lluvia(pyglet.sprite.Sprite):
 

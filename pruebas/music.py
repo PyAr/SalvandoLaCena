@@ -3,6 +3,7 @@ import socket
 import time
 
 import pyglet
+pyglet.resource.path = ['..']
 
 wavefile_name = 'music/music.wav'
 wavefile_name_reverse = 'music/music_reversed.wav'

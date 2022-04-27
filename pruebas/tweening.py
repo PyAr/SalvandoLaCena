@@ -6,6 +6,7 @@ from pyglet.window import key
 from bisect import bisect
 from itertools import cycle
 import threading
+pyglet.resource.path = ['..']
 
 #### inicio funciones tweening
 

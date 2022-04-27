@@ -1,6 +1,7 @@
 import sys
 import math
 import pyglet
+pyglet.resource.path = ['..']
 
 delta_time = 1
 FRAME_TIME = 1 / 60

@@ -2,6 +2,7 @@ import pyglet
 import pyglet.window.key
 from pyglet.window import mouse
 from pyglet import shapes
+pyglet.resource.path = ['..']
 
 #global window
 window = pyglet.window.Window(style = pyglet.window.Window.WINDOW_STYLE_DIALOG, resizable = True, caption = 'Salvando La Cena')

@@ -1,5 +1,6 @@
 import pyglet
 from pyglet.window import key
+pyglet.resource.path = ['..']
 
 window = pyglet.window.Window(800, 600)
 
