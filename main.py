@@ -1,19 +1,23 @@
 import math
-import random
 import socket
 import sys
 import threading
 import time
-from itertools import cycle
 
 import pyglet
-from pyglet.gl import *
+from pyglet.gl import (glPopMatrix, glPushMatrix, glTranslatef, gluPerspective,
+                       glViewport)
 from pyglet.window import key
 
-from constants import COLCHON, FRAME_ESTADISTICAS, FRAME_TIME, SUBFRAMES, SUELO
+from constants import FRAME_ESTADISTICAS, FRAME_TIME, SUBFRAMES
 from loggable_items import Final, Pelota, Sombra
-from screen_items import (Chispear, Estadisticas, Fondo, Lluvia, Player,
-                          Reloj, Title)
+from screen_items import (Chispear, Estadisticas, Fondo, Lluvia, Player, Reloj,
+                          Title)
+
+
+def get_current_frame():
+    return int(current_subframe / SUBFRAMES)
+
 
 jugando = False
 
@@ -26,14 +30,8 @@ if len(sys.argv) > 1 and ("-f" in sys.argv or "--fullscreen" in sys.argv):
 
 window = pyglet.window.Window(800, 600, fullscreen=fullscreen, resizable=True)
 delta_time = 1
-
 current_subframe = 0
-
-def get_current_frame():
-    return int(current_subframe / SUBFRAMES)
-
 dt_accum = 0
-
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
 joysticks = pyglet.input.get_joysticks()
@@ -46,19 +44,41 @@ if joysticks:
 if joystick:
     joystick.open()
 
-
-## musica
+# musica
 song = pyglet.media.load(wavefile_name)
 reversed_song = pyglet.media.load(wavefile_name_reverse)
 music_player = pyglet.media.Player()
 player_reverse = pyglet.media.Player()
-
 music_player.queue(song)
 music_player.loop = True
 player_reverse.queue(reversed_song)
 player_reverse.loop = True
-
 para_atras = False
+player = Player(joystick=joystick, para_atras=para_atras, keys=keys)
+sombra = Sombra(player)
+reloj = Reloj(delta_time=delta_time)
+chispear = [
+    Chispear(902, 8, get_current_frame=get_current_frame),
+    Chispear(555, 8, 4, get_current_frame=get_current_frame),
+    Chispear(112, 8, 6, get_current_frame=get_current_frame),
+    Chispear(787, 20, get_current_frame=get_current_frame),
+    Chispear(878, 20, 4, get_current_frame=get_current_frame),
+]
+esperas = [1, 10, 11, 20, 22, 25, 30, 31, 38, 39]
+objetos = []
+
+for numero, espera in enumerate(esperas):
+    objeto = Pelota(espera=espera * 0.6, imagen=f"imagenes/objeto_{numero+1}.png")
+    objetos.append(objeto)
+
+final = Final(espera=50 * 0.6)
+estadisticas = Estadisticas(window=window, objetos=objetos, get_current_frame=get_current_frame)
+
+# label = Label()
+lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800, delta_time=delta_time)
+lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200, delta_time=delta_time)
+fondo = Fondo("imagenes/fondo_juego.png")
+title = Title()
 
 
 def update_direction(delta_time):
@@ -78,36 +98,6 @@ def update_direction(delta_time):
             player_reverse.play()
             para_atras = True
 
-player = Player(joystick=joystick, para_atras=para_atras, keys=keys)
-sombra = Sombra(player)
-reloj = Reloj(delta_time=delta_time)
-
-chispear = [
-    Chispear(902, 8, get_current_frame=get_current_frame),
-    Chispear(555, 8, 4, get_current_frame=get_current_frame),
-    Chispear(112, 8, 6, get_current_frame=get_current_frame),
-    Chispear(787, 20, get_current_frame=get_current_frame),
-    Chispear(878, 20, 4, get_current_frame=get_current_frame),
-]
-
-esperas = [1, 10, 11, 20, 22, 25, 30, 31, 38, 39]
-objetos = []
-
-for numero, espera in enumerate(esperas):
-    objeto = Pelota(espera=espera * 0.6, imagen=f"imagenes/objeto_{numero+1}.png")
-    objetos.append(objeto)
-
-final = Final(espera=50 * 0.6)
-estadisticas = Estadisticas(window=window, objetos=objetos, get_current_frame=get_current_frame)
-
-# label = Label()
-lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800, delta_time=delta_time)
-lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200, delta_time=delta_time)
-fondo = Fondo("imagenes/fondo_juego.png")
-title = Title()
-
-def get_current_frame():
-    return int(current_subframe / SUBFRAMES)
 
 def update_objetos(dt):
     global dt_accum
@@ -164,7 +154,7 @@ def on_draw():
     window.clear()
     glPushMatrix()
     x = int(window.width / 2)
-    a = window.width / float(window.height)
+    # a = window.width / float(window.height)
     glTranslatef(-400, -600 / 2, -521)
 
     # el fondo se muestra en el menu y el juego
