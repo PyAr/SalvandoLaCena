@@ -9,39 +9,39 @@ from pyglet.gl import (glPopMatrix, glPushMatrix, glTranslatef, gluPerspective,
                        glViewport)
 from pyglet.window import key
 
-from constants import (FRAME_ESTADISTICAS, FRAME_TIME, SUBFRAMES,
+from constants import (FIFO_WHEEL_FILE, FRAME_ESTADISTICAS, FRAME_TIME, SUBFRAMES,
                        WAVEFILE_NAME, WAVEFILE_NAME_REVERSE)
 from loggable_items import Final, Pelota, Sombra
 from screen_items import (Chispear, Estadisticas, Fondo, Lluvia, Player, Reloj,
                           Title)
 
-window = None
 
 fullscreen = False
-if len(sys.argv) > 1 and ("-f" in sys.argv or "--fullscreen" in sys.argv):
-    fullscreen = True
+use_wheel = False
+
+if len(sys.argv) > 1:
+    if ("-f" in sys.argv or "--fullscreen" in sys.argv):
+        fullscreen = True
+
+    if ("-w" in sys.argv or "--wheel" in sys.argv):
+        use_wheel = True
 
 
 def get_current_frame():
     return int(current_subframe / SUBFRAMES)
 
+window = pyglet.window.Window(800, 600, fullscreen=fullscreen, resizable=True)
 jugando = False
-
+para_atras = False
 delta_time = 1
 current_subframe = 0
 dt_accum = 0
-
-def main(fullscreen):
-    global window
-    window = pyglet.window.Window(800, 600, fullscreen=fullscreen, resizable=True)
-
-
-main(fullscreen)
-
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
 joysticks = pyglet.input.get_joysticks()
 joystick = None
+music_player = pyglet.media.Player()
+player_reverse = pyglet.media.Player()
 
 if joysticks:
     print("Hay un joystick")
@@ -50,16 +50,7 @@ if joysticks:
 if joystick:
     joystick.open()
 
-# musica
-song = pyglet.media.load(WAVEFILE_NAME)
-reversed_song = pyglet.media.load(WAVEFILE_NAME_REVERSE)
-music_player = pyglet.media.Player()
-player_reverse = pyglet.media.Player()
-music_player.queue(song)
-music_player.loop = True
-player_reverse.queue(reversed_song)
-player_reverse.loop = True
-para_atras = False
+# Definición de objetos con historia y esperas
 player = Player(joystick=joystick, para_atras=para_atras, keys=keys)
 sombra = Sombra(player)
 reloj = Reloj(delta_time=delta_time)
@@ -77,14 +68,22 @@ for numero, espera in enumerate(esperas):
     objeto = Pelota(espera=espera * 0.6, imagen=f"imagenes/objeto_{numero+1}.png")
     objetos.append(objeto)
 
-final = Final(espera=50 * 0.6)
-estadisticas = Estadisticas(window=window, objetos=objetos, get_current_frame=get_current_frame)
-
-# label = Label()
+# Items en pantalla
 lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800, delta_time=delta_time)
 lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200, delta_time=delta_time)
 fondo = Fondo("imagenes/fondo_juego.png")
 title = Title()
+final = Final(espera=50 * 0.6)
+estadisticas = Estadisticas(window=window, objetos=objetos, get_current_frame=get_current_frame)
+
+
+def play_music():
+    song = pyglet.media.load(WAVEFILE_NAME)
+    reversed_song = pyglet.media.load(WAVEFILE_NAME_REVERSE)
+    music_player.queue(song)
+    music_player.loop = True
+    player_reverse.queue(reversed_song)
+    player_reverse.loop = True
 
 
 def update_direction(delta_time):
@@ -137,7 +136,6 @@ def update_objetos(dt):
 def update(dt):
     global delta_time
     global jugando
-    # print(joystick.x)
 
     if jugando:
         lluvia_1.update(dt)
@@ -200,32 +198,29 @@ def convert_speed_value(value):
 def read_wheel():
     global delta_time
 
-    s = socket.socket()
-    s.connect(("192.168.4.1", 80))
-
+    fp = open(FIFO_WHEEL_FILE)
     while True:
         time.sleep(0.1)
-
-        s.send(b"\xFF")
-        raw = s.recv(10)
-        raw_value = int(raw.decode("ascii"))
+        raw_value = int(fp.readline())
         delta_time = -convert_speed_value(raw_value)
 
-
-# t1 = threading.Thread(target=read_wheel)
-# t1.start()
+if use_wheel:
+    t1 = threading.Thread(target=read_wheel)
+    t1.start()
 
 
 @window.event
 def on_close():
-    # t1.join()
+    if use_wheel:
+        t1.join()
     print("cerrando")
 
 
 @window.event
 def on_mouse_motion(x, y, dx, dy):
-    global delta_time
-    delta_time = (x - 400) / 200.0
+    if not use_wheel:
+        global delta_time
+        delta_time = (x - 400) / 200.0
 
 
 @window.event
@@ -237,4 +232,5 @@ def on_resize(width, height):
 window.set_minimum_size(400, 300)
 gluPerspective(60.0, window.width / float(window.height), 0.1, 1000.0)
 pyglet.clock.schedule_interval(update, 1 / 100.0)
+play_music()
 pyglet.app.run()
