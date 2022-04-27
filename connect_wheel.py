@@ -12,12 +12,20 @@ def convert_speed_value(value):
     return converted_value
 
 
+def convert_speed_value_ext(value):
+    try:
+        converted_value = (value / 250) - 1
+    except:
+        converted_value = None
+    return converted_value
+
+
 def read_wheel():
     fp = open(FIFO_WHEEL_FILE)
     while True:
         time.sleep(0.1)
         raw_value = int(fp.readline())
-        converted_value = convert_speed_value(raw_value)
+        converted_value = convert_speed_value_ext(raw_value)
         #print(raw_value, converted_value)
         if converted_value is not None:
             yield converted_value
