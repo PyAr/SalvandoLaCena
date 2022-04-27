@@ -7,5 +7,7 @@ FRAME_ESTADISTICAS = 1815
 SUBFRAMES = 10
 COLCHON = 140
 SUELO = 70
+WAVEFILE_NAME = "music/music.wav"
+WAVEFILE_NAME_REVERSE = "music/music_reversed.wav"
 
 

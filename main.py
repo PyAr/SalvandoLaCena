@@ -9,29 +9,35 @@ from pyglet.gl import (glPopMatrix, glPushMatrix, glTranslatef, gluPerspective,
                        glViewport)
 from pyglet.window import key
 
-from constants import FRAME_ESTADISTICAS, FRAME_TIME, SUBFRAMES
+from constants import (FRAME_ESTADISTICAS, FRAME_TIME, SUBFRAMES,
+                       WAVEFILE_NAME, WAVEFILE_NAME_REVERSE)
 from loggable_items import Final, Pelota, Sombra
 from screen_items import (Chispear, Estadisticas, Fondo, Lluvia, Player, Reloj,
                           Title)
 
-
-def get_current_frame():
-    return int(current_subframe / SUBFRAMES)
-
-
-jugando = False
-
-wavefile_name = "music/music.wav"
-wavefile_name_reverse = "music/music_reversed.wav"
+window = None
 
 fullscreen = False
 if len(sys.argv) > 1 and ("-f" in sys.argv or "--fullscreen" in sys.argv):
     fullscreen = True
 
-window = pyglet.window.Window(800, 600, fullscreen=fullscreen, resizable=True)
+
+def get_current_frame():
+    return int(current_subframe / SUBFRAMES)
+
+jugando = False
+
 delta_time = 1
 current_subframe = 0
 dt_accum = 0
+
+def main(fullscreen):
+    global window
+    window = pyglet.window.Window(800, 600, fullscreen=fullscreen, resizable=True)
+
+
+main(fullscreen)
+
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
 joysticks = pyglet.input.get_joysticks()
@@ -45,8 +51,8 @@ if joystick:
     joystick.open()
 
 # musica
-song = pyglet.media.load(wavefile_name)
-reversed_song = pyglet.media.load(wavefile_name_reverse)
+song = pyglet.media.load(WAVEFILE_NAME)
+reversed_song = pyglet.media.load(WAVEFILE_NAME_REVERSE)
 music_player = pyglet.media.Player()
 player_reverse = pyglet.media.Player()
 music_player.queue(song)
