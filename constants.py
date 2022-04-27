@@ -9,5 +9,5 @@ COLCHON = 140
 SUELO = 70
 WAVEFILE_NAME = "music/music.wav"
 WAVEFILE_NAME_REVERSE = "music/music_reversed.wav"
-
+FIFO_WHEEL_FILE = '/tmp/lector'
 
