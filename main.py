@@ -11,6 +11,7 @@ from pyglet.window import key
 
 from constants import (FIFO_WHEEL_FILE, FRAME_ESTADISTICAS, FRAME_TIME, SUBFRAMES,
                        WAVEFILE_NAME, WAVEFILE_NAME_REVERSE)
+from connect_wheel import read_wheel
 from loggable_items import Final, Pelota, Sombra
 from screen_items import (Chispear, Estadisticas, Fondo, Lluvia, Player, Reloj,
                           Title)
@@ -190,22 +191,14 @@ def on_draw():
     glPopMatrix()
 
 
-def convert_speed_value(value):
-    converted_value = -1 * math.log10(-value + 947) + 2
-    return converted_value
-
-
-def read_wheel():
+def update_wheel_value():
     global delta_time
 
-    fp = open(FIFO_WHEEL_FILE)
-    while True:
-        time.sleep(0.1)
-        raw_value = int(fp.readline())
-        delta_time = -convert_speed_value(raw_value)
+    for value in read_wheel():
+        delta_time = value
 
 if use_wheel:
-    t1 = threading.Thread(target=read_wheel)
+    t1 = threading.Thread(target=update_wheel_value)
     t1.start()
 
 
