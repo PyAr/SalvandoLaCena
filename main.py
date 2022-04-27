@@ -54,7 +54,7 @@ if joystick:
 # Definición de objetos con historia y esperas
 player = Player(joystick=joystick, para_atras=para_atras, keys=keys)
 sombra = Sombra(player)
-reloj = Reloj(delta_time=delta_time)
+reloj = Reloj()
 chispear = [
     Chispear(902, 8, get_current_frame=get_current_frame),
     Chispear(555, 8, 4, get_current_frame=get_current_frame),
@@ -143,7 +143,7 @@ def update(dt):
         # label.update(dt)
         lluvia_2.update(dt)
         player.update(dt)
-        reloj.update(dt)
+        reloj.update(delta_time)
         estadisticas.update()
         update_direction(delta_time)
         update_objetos(dt)

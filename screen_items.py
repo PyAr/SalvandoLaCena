@@ -277,8 +277,6 @@ class Player(pyglet.sprite.Sprite):
 class Reloj(pyglet.sprite.Sprite):
     def __init__(self, *args, **kwargs):
         image = pyglet.resource.image("imagenes/reloj.png")
-        self.delta_time = kwargs['delta_time']
-        del(kwargs['delta_time'])
         super().__init__(img=image, *args, **kwargs)
 
         image.anchor_x = image.width / 2
@@ -289,8 +287,8 @@ class Reloj(pyglet.sprite.Sprite):
         self.scale = 0.3
         self.opacity = 128
 
-    def update(self, dt):
-        self.rotation = self.delta_time * 90
+    def update(self, delta_time):
+        self.rotation = delta_time * 90
 
 
 
