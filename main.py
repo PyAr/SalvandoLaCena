@@ -70,8 +70,8 @@ for numero, espera in enumerate(esperas):
     objetos.append(objeto)
 
 # Items en pantalla
-lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800, delta_time=delta_time)
-lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200, delta_time=delta_time)
+lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800,)
+lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200)
 fondo = Fondo("imagenes/fondo_juego.png")
 title = Title()
 final = Final(espera=50 * 0.6)
@@ -139,9 +139,9 @@ def update(dt):
     global jugando
 
     if jugando:
-        lluvia_1.update(dt)
+        lluvia_1.update(dt, delta_time)
         # label.update(dt)
-        lluvia_2.update(dt)
+        lluvia_2.update(dt, delta_time)
         player.update(dt)
         reloj.update(delta_time)
         estadisticas.update()

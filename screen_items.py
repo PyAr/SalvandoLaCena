@@ -11,8 +11,6 @@ class Lluvia(pyglet.sprite.Sprite):
         self, nombre_imagen="imagenes/lluvia-02.png", velocidad=200, *args, **kwargs
     ):
         self.velocidad = velocidad
-        self.delta_time = kwargs['delta_time']
-        del(kwargs['delta_time'])
         image = pyglet.resource.image(nombre_imagen)
         self.textura = pyglet.image.TileableTexture.create_for_image(image)
         super().__init__(img=image, *args, **kwargs)
@@ -22,8 +20,8 @@ class Lluvia(pyglet.sprite.Sprite):
         pyglet.gl.glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
         self.textura.blit_tiled(0, 0, 0, 800, 600)
 
-    def update(self, dt):
-        self.textura.anchor_y += dt * self.delta_time * self.velocidad
+    def update(self, dt, delta_time):
+        self.textura.anchor_y += dt * delta_time * self.velocidad
 
 
 class Chispear(pyglet.sprite.Sprite):
