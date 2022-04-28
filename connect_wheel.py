@@ -12,7 +12,13 @@ def convert_speed_value(value):
     return converted_value
 
 
-def convert_speed_value_ext(value):
+def convert_speed_value_linear(value):
+    # if the value is greater than 496 it means hardware error, loose pin, etc
+    # Therefore ignore the reading
+
+    if value > 496:
+        return
+
     try:
         converted_value = (value / 250) - 1
     except:
@@ -23,9 +29,9 @@ def convert_speed_value_ext(value):
 def read_wheel():
     fp = open(FIFO_WHEEL_FILE)
     while True:
-        time.sleep(0.1)
+        time.sleep(0.05)
         raw_value = int(fp.readline())
-        converted_value = convert_speed_value_ext(raw_value)
+        converted_value = convert_speed_value_linear(raw_value)
         #print(raw_value, converted_value)
         if converted_value is not None:
             yield converted_value
