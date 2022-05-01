@@ -134,8 +134,19 @@ def update_objetos(dt):
         final.update(delta_time > 0)
 
 
+def reiniciar_objetos():
+    global dt_accum
+    global current_subframe
+
+    dt_accum = 0
+    current_subframe = 0
+    final.reiniciar()
+    sombra.reiniciar()
+    for x in objetos:
+        x.reiniciar()
+
+
 def update(dt):
-    global delta_time
     global jugando
 
     if jugando:
@@ -147,6 +158,15 @@ def update(dt):
         estadisticas.update()
         update_direction(delta_time)
         update_objetos(dt)
+        if keys[key.R]:
+            # Reiniciar todo
+            jugando = False
+            player.reiniciar()
+            music_player.pause()
+            music_player.seek(0)
+            player_reverse.pause()
+            player_reverse.seek(0)
+            reiniciar_objetos()
     else:
         if keys[key.SPACE]:
             if not jugando:
@@ -184,9 +204,10 @@ def on_draw():
         if get_current_frame() > FRAME_ESTADISTICAS:
             estadisticas.draw()
 
-        reloj.draw()
     else:
         title.draw()
+
+    reloj.draw()
 
     glPopMatrix()
 

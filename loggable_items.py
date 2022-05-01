@@ -5,6 +5,7 @@ from constants import COLCHON, FRAME_ESTADISTICAS, FRAME_TIME, SUBFRAMES, SUELO
 
 class SpriteConHistoria(pyglet.sprite.Sprite):
     def __init__(self, espera, *args, **kwargs):
+        self.espera_inicial = espera
         self.espera = espera
         self.history = []
         super().__init__(*args, **kwargs)
@@ -41,6 +42,13 @@ class SpriteConHistoria(pyglet.sprite.Sprite):
 
         self.actualizar(*args, **kwargs)
         self.history.append(self.serializar())
+
+    def reiniciar(self):
+        self.espera = self.espera_inicial
+        if len(self.history):
+            estado_inicial = self.history[0]
+            self.history = []
+            self.restaurar(estado_inicial)
 
 
 class Final(SpriteConHistoria):
@@ -150,6 +158,10 @@ class Pelota(SpriteConHistoria):
             self.vx = 0
             self.vy = 0
             self.vr = 0
+
+    def reiniciar(self):
+        super().reiniciar()
+        self.opacity = 255
 
 
 class Sombra(SpriteConHistoria):

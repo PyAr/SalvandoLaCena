@@ -230,8 +230,8 @@ class Player(pyglet.sprite.Sprite):
 
         self.scale = 0.8
 
-        self.x = 100
-        self.y = 80
+        self.posicion_inicial = 100, 80
+        self.x, self.y = self.posicion_inicial
 
     def update(self, dt):
         joystick = self.joystick
@@ -270,6 +270,9 @@ class Player(pyglet.sprite.Sprite):
                 else:
                     self.idx_animacion = 0
                 self.image = self.animacion[self.idx_animacion]
+
+    def reiniciar(self):
+        self.x, self.y = self.posicion_inicial
 
 
 class Reloj(pyglet.sprite.Sprite):
