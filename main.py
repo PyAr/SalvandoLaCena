@@ -160,7 +160,7 @@ def update(dt):
         estadisticas.update()
         update_direction(delta_time)
         update_objetos(dt)
-        if keys[key.R]:
+        if keys[key.R] or get_current_frame() > FRAME_ESTADISTICAS * 1.3:
             # Reiniciar todo
             jugando = False
             player.reiniciar()
