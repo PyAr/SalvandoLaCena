@@ -73,7 +73,8 @@ for numero, espera in enumerate(esperas):
 lluvia_2 = Lluvia("imagenes/lluvia-02.png", velocidad=800,)
 lluvia_1 = Lluvia("imagenes/lluvia-01.png", velocidad=1200)
 fondo = Fondo("imagenes/fondo_juego.png")
-title = Title()
+title = Title(window)
+
 final = Final(espera=50 * 0.6)
 estadisticas = Estadisticas(window=window, objetos=objetos, get_current_frame=get_current_frame)
 
@@ -149,12 +150,13 @@ def reiniciar_objetos():
 def update(dt):
     global jugando
 
+    reloj.update(delta_time)
+
     if jugando:
         lluvia_1.update(dt, delta_time)
         # label.update(dt)
         lluvia_2.update(dt, delta_time)
         player.update(dt)
-        reloj.update(delta_time)
         estadisticas.update()
         update_direction(delta_time)
         update_objetos(dt)
@@ -168,10 +170,11 @@ def update(dt):
             player_reverse.seek(0)
             reiniciar_objetos()
     else:
-        if keys[key.SPACE]:
-            if not jugando:
-                music_player.play()
-                jugando = True
+        podemos_continuar = abs(1 - delta_time) < 0.1
+        title.update(podemos_continuar)
+        if keys[key.SPACE] and podemos_continuar:
+            music_player.play()
+            jugando = True
 
 
 @window.event

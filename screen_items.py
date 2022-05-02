@@ -84,11 +84,38 @@ class Fondo(pyglet.sprite.Sprite):
         super().__init__(img=image, *args, **kwargs)
 
 
-class Title(pyglet.sprite.Sprite):
-    def __init__(self, *args, **kwargs):
-        image = pyglet.resource.image("imagenes/title.png")
-        super().__init__(img=image, *args, **kwargs)
+class Title(pyglet.graphics.Batch):
+    def __init__(self, window):
+        super().__init__()
+        grupo_imagen = pyglet.graphics.OrderedGroup(0)
+        grupo_mensaje = pyglet.graphics.OrderedGroup(1)
+        self.continuar_anterior = None
 
+        self.mensaje = pyglet.text.Label(
+            font_name="Sans Serif",
+            font_size=20,
+            bold=True,
+            x=window.width / 2,
+            y=window.height / 6,
+            anchor_x="center",
+            anchor_y="center",
+            batch=self,
+            group=grupo_mensaje,
+        )
+        image = pyglet.resource.image("imagenes/title.png")
+        self.sprite_image = pyglet.sprite.Sprite(img=image, batch=self, group=grupo_imagen)
+
+    def update(self, podemos_continuar):
+        if podemos_continuar == self.continuar_anterior:
+            return
+
+        self.continuar_anterior = podemos_continuar
+        if podemos_continuar:
+            self.mensaje.text = "¡apretar el botón ⬤ para empezar!"
+            self.mensaje.color = (255, 255, 0, 255)
+        else:
+            self.mensaje.text = "poner el volante en ➜ para continuar"
+            self.mensaje.color = (255, 255, 0, 155)
 
 
 class Estadisticas(pyglet.graphics.Batch):
