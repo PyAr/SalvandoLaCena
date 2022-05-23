@@ -172,9 +172,11 @@ def update(dt):
     else:
         podemos_continuar = abs(1 - delta_time) < 0.1
         title.update(podemos_continuar)
-        if keys[key.SPACE] and podemos_continuar:
-            music_player.play()
-            jugando = True
+
+        if podemos_continuar:
+            if keys[key.SPACE] or (joystick and True in joystick.buttons):
+                music_player.play()
+                jugando = True
 
 
 @window.event

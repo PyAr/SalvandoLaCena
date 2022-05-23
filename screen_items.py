@@ -267,8 +267,12 @@ class Player(pyglet.sprite.Sprite):
         keys = self.keys
 
         if joystick:
-            if joystick.x < -0.2 or joystick.x > 0.2:
-                self.x += joystick.x * 20
+            #if joystick.x < -0.2 or joystick.x > 0.2:
+            #    self.x += joystick.x * 10
+            # Hack: puse esto porque la palanca del arcade me toma mal
+            # los ejes.
+            if joystick.y < -0.2 or joystick.y > 0.2:
+                self.x += joystick.y * 10
 
         if keys[key.RIGHT]:
             self.x += 10
