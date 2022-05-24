@@ -170,7 +170,7 @@ def update(dt):
             player_reverse.seek(0)
             reiniciar_objetos()
     else:
-        podemos_continuar = abs(1 - delta_time) < 0.1
+        podemos_continuar =  0.7 >= delta_time > 0.6
         title.update(podemos_continuar)
 
         if podemos_continuar:
