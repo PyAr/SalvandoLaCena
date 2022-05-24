@@ -20,9 +20,11 @@ def convert_speed_value_manual(value):
     if 237<=value<303: return -0.4
     if 303<=value<341: return -0.3
     if 341<=value<375: return -0.2
-    if 375<=value<414: return -0.1
-    if 414<=value<483: return 0
-    if 483<=value<512: return 0.1
+    if 375<=value<400: return -0.1
+    if 400<=value<444: return -0.05
+    if 444<=value<483: return 0
+    if 483<=value<500: return 0.05
+    if 500<=value<512: return 0.1
     if 512<=value<541: return 0.2
     if 541<=value<571: return 0.3
     if 571<=value<600: return 0.4
