@@ -17,6 +17,8 @@ from screen_items import (Chispear, Estadisticas, Fondo, Lluvia, Player, Reloj,
                           Title)
 
 
+run_read_wheel = threading.Event()
+
 fullscreen = False
 use_wheel = False
 
@@ -217,20 +219,22 @@ def on_draw():
     glPopMatrix()
 
 
-def update_wheel_value():
+def update_wheel_value(run_read_wheel):
     global delta_time
 
-    for value in read_wheel():
+    for value in read_wheel(run_read_wheel):
         delta_time = value
 
 if use_wheel:
-    t1 = threading.Thread(target=update_wheel_value)
+    run_read_wheel.set()
+    t1 = threading.Thread(target=update_wheel_value, args=(run_read_wheel,))
     t1.start()
 
 
 @window.event
 def on_close():
     if use_wheel:
+        run_read_wheel.clear()
         t1.join()
     print("cerrando")
 

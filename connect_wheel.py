@@ -1,5 +1,7 @@
-import time
 import math
+import time
+import threading
+
 from constants import FIFO_WHEEL_FILE
 
 
@@ -51,18 +53,19 @@ def convert_speed_value_linear(value):
     return converted_value
 
 
-def read_wheel():
+def read_wheel(run_read_wheel):
     fp = open(FIFO_WHEEL_FILE)
-    while True:
+    while run_read_wheel.is_set():
         time.sleep(0.05)
         raw_value = int(fp.readline())
         converted_value = convert_speed_value_manual(raw_value)
-        #print(raw_value, converted_value)
         if converted_value is not None:
             yield converted_value
 
 
 if __name__=="__main__":
-    for value in read_wheel():
-        pass
-        #print("el value, ",value)
+    run_read_wheel = threading.Event()
+    run_read_wheel.set()
+
+    for value in read_wheel(run_read_wheel):
+        print(value)
