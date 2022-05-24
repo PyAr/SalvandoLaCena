@@ -90,9 +90,9 @@ def play_music():
 
 def update_direction(delta_time):
     # player.pitch = delta_time + 1
-    music_player.pitch = abs(delta_time) * 1.4
+    music_player.pitch = abs(delta_time) * 1.6
     # player_reverse.pitch = delta_time*-1 + 1
-    player_reverse.pitch = abs(delta_time) * 1.4
+    player_reverse.pitch = abs(delta_time) * 1.6
     global para_atras
     if para_atras:
         if delta_time >= 0:
@@ -114,7 +114,7 @@ def update_objetos(dt):
         # en pausa, previene división por cero
         return
 
-    delta_frame = FRAME_TIME / SUBFRAMES / abs(delta_time)
+    delta_frame = FRAME_TIME / SUBFRAMES / abs(delta_time*2)
     if dt_accum + dt < delta_frame:
         dt_accum += dt
         return
@@ -170,7 +170,7 @@ def update(dt):
             player_reverse.seek(0)
             reiniciar_objetos()
     else:
-        podemos_continuar =  0.7 >= delta_time > 0.6
+        podemos_continuar =  0.6 >= delta_time > 0.5
         title.update(podemos_continuar)
 
         if podemos_continuar:
@@ -237,9 +237,10 @@ def on_close():
 
 @window.event
 def on_mouse_motion(x, y, dx, dy):
+    print(x)
     if not use_wheel:
         global delta_time
-        delta_time = (x - 400) / 200.0
+        delta_time = (x - 400) / 400.0
 
 
 @window.event
