@@ -57,7 +57,7 @@ def read_wheel():
         time.sleep(0.05)
         raw_value = int(fp.readline())
         converted_value = convert_speed_value_manual(raw_value)
-        print(raw_value, converted_value)
+        #print(raw_value, converted_value)
         if converted_value is not None:
             yield converted_value
 
