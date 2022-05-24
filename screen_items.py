@@ -320,7 +320,7 @@ class Reloj(pyglet.sprite.Sprite):
         self.opacity = 128
 
     def update(self, delta_time):
-        self.rotation = delta_time * 90
+        self.rotation = delta_time * 135
 
 
 
