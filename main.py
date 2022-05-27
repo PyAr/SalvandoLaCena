@@ -263,6 +263,7 @@ gluPerspective(60.0, window.width / float(window.height), 0.1, 1000.0)
 window.set_minimum_size(400, 300)
 window.set_size(screen_width, screen_height)
 if fullscreen:
+    window.set_mouse_visible(False)
     window.set_fullscreen()
 pyglet.clock.schedule_interval(update, 1 / 100.0)
 play_music()
