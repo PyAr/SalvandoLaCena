@@ -249,7 +249,9 @@ def on_mouse_motion(x, y, dx, dy):
 
 @window.event
 def on_resize(width, height):
-    glViewport(0, 0, int(height / 0.75), height)
+    scaled_width = height / 0.75
+    dx = (width - scaled_width) / 2
+    glViewport(int(dx), 0, int(scaled_width), height)
     return pyglet.event.EVENT_HANDLED
 
 
