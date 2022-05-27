@@ -245,7 +245,7 @@ def on_close():
 
 @window.event
 def on_mouse_motion(x, y, dx, dy):
-    print(x)
+    # print(x)
     if not use_wheel:
         global delta_time
         delta_time = (x - 400) / 400.0
