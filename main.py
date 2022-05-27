@@ -33,7 +33,11 @@ if len(sys.argv) > 1:
 def get_current_frame():
     return int(current_subframe / SUBFRAMES)
 
-window = pyglet.window.Window(800, 600, fullscreen=fullscreen, resizable=True)
+display = pyglet.canvas.Display()
+screen = display.get_default_screen()
+screen_width = screen.width
+screen_height = screen.height
+window = pyglet.window.Window(800, 600, resizable=True)
 jugando = False
 para_atras = False
 delta_time = 1
@@ -255,8 +259,11 @@ def on_resize(width, height):
     return pyglet.event.EVENT_HANDLED
 
 
-window.set_minimum_size(400, 300)
 gluPerspective(60.0, window.width / float(window.height), 0.1, 1000.0)
+window.set_minimum_size(400, 300)
+window.set_size(screen_width, screen_height)
+if fullscreen:
+    window.set_fullscreen()
 pyglet.clock.schedule_interval(update, 1 / 100.0)
 play_music()
 pyglet.app.run()
